@@ -1,0 +1,26 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< xyz.refrain:online-edu >-----------------------
+[INFO] Building online-edu 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] The POM for it.sauronsoftware:jave:jar:1.0.2 is missing, no dependency information available
+[WARNING] The POM for com.aliyun:aliyun-java-vod-upload:jar:1.4.13 is missing, no dependency information available
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.705 s
+[INFO] Finished at: 2026-04-07T09:27:27+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project online-edu: Could not resolve dependencies for project xyz.refrain:online-edu:jar:0.0.1-SNAPSHOT
+[ERROR] dependency: it.sauronsoftware:jave:jar:1.0.2 (compile)
+[ERROR] 	it.sauronsoftware:jave:jar:1.0.2 was not found in http://maven.aliyun.com/nexus/content/repositories/central/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of alimaven has elapsed or updates are forced
+[ERROR] dependency: com.aliyun:aliyun-java-vod-upload:jar:1.4.13 (compile)
+[ERROR] 	com.aliyun:aliyun-java-vod-upload:jar:1.4.13 was not found in http://maven.aliyun.com/nexus/content/repositories/central/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of alimaven has elapsed or updates are forced
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException

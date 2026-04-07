@@ -1,0 +1,92 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< xyz.refrain:online-edu >-----------------------
+[INFO] Building online-edu 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:2.4.2:run (default-cli) > test-compile @ online-edu >>>
+[INFO] 
+[INFO] --- resources:3.2.0:resources (default-resources) @ online-edu ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 16 resources
+[INFO] 
+[INFO] --- compiler:3.8.1:compile (default-compile) @ online-edu ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.2.0:testResources (default-testResources) @ online-edu ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] skip non existing resourceDirectory E:\SmartCourse\OnlineEdu-master\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.8.1:testCompile (default-testCompile) @ online-edu ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] <<< spring-boot:2.4.2:run (default-cli) < test-compile @ online-edu <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:2.4.2:run (default-cli) @ online-edu ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.4.2)
+
+2026-04-07 09:41:12.128  INFO 84300 --- [           main] x.r.onlineedu.OnlineEduApplication       : Starting OnlineEduApplication using Java 17.0.10 on Le0n with PID 84300 (E:\SmartCourse\OnlineEdu-master\target\classes started by 16068 in E:\SmartCourse\OnlineEdu-master)
+2026-04-07 09:41:12.129  INFO 84300 --- [           main] x.r.onlineedu.OnlineEduApplication       : No active profile set, falling back to default profiles: default
+2026-04-07 09:41:12.542  INFO 84300 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2026-04-07 09:41:12.544  INFO 84300 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-07 09:41:12.558  INFO 84300 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 9 ms. Found 0 Redis repository interfaces.
+2026-04-07 09:41:12.668  INFO 84300 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'hibernateValidationConfig' of type [xyz.refrain.onlineedu.config.HibernateValidationConfig$$EnhancerBySpringCGLIB$$2566f0b0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2026-04-07 09:41:12.677  INFO 84300 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'validator' of type [org.hibernate.validator.internal.engine.ValidatorImpl] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2026-04-07 09:41:13.034  INFO 84300 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-04-07 09:41:13.038  INFO 84300 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-07 09:41:13.039  INFO 84300 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.41]
+2026-04-07 09:41:13.082  INFO 84300 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-04-07 09:41:13.082  INFO 84300 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 925 ms
+2026-04-07 09:41:13.157  WARN 84300 --- [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'aliyunConfig': Unsatisfied dependency expressed through field 'aliyunProperties'; nested exception is org.springframework.boot.context.properties.ConfigurationPropertiesBindException: Error creating bean with name 'aliyun-xyz.refrain.onlineedu.config.properties.AliyunProperties': Could not bind properties to 'AliyunProperties' : prefix=aliyun, ignoreInvalidFields=false, ignoreUnknownFields=true; nested exception is org.springframework.boot.context.properties.bind.BindException: Failed to bind properties under 'aliyun' to xyz.refrain.onlineedu.config.properties.AliyunProperties
+2026-04-07 09:41:13.159  INFO 84300 --- [           main] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-04-07 09:41:13.166  INFO 84300 --- [           main] ConditionEvaluationReportLoggingListener : 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2026-04-07 09:41:13.173 ERROR 84300 --- [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Binding to target org.springframework.boot.context.properties.bind.BindException: Failed to bind properties under 'aliyun' to xyz.refrain.onlineedu.config.properties.AliyunProperties failed:
+
+    Property: aliyun.accessKeySecret
+    Value: null
+    Reason: 不能为空
+
+    Property: aliyun.accessKeyId
+    Value: null
+    Reason: 不能为空
+
+
+Action:
+
+Update your application's configuration
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.687 s
+[INFO] Finished at: 2026-04-07T09:41:13+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.4.2:run (default-cli) on project online-edu: Application finished with exit code: 1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

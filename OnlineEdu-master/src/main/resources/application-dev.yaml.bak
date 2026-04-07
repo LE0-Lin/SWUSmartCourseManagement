@@ -1,0 +1,37 @@
+server:
+  port: 9096
+
+spring:
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/online_edu?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
+    username: root
+    password: tm050711
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+  redis:
+    host: localhost
+    port: 6379
+    password: ""
+    timeout: 3000
+
+mybatis-plus:
+  configuration:
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    default-enum-type-handler: com.baomidou.mybatisplus.extension.handlers.MybatisEnumTypeHandler
+  mapper-locations:
+    - classpath:xyz.refrain/onlineedu/mapper/xml/*.xml
+
+# aliyun
+aliyun:
+  access-key-id: dummy
+  access-key-secret: dummy
+  oss:
+    bucket-name: dummy
+    endpoint: dummy
+  vod:
+    region-id: dummy
