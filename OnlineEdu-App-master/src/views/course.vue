@@ -9,9 +9,9 @@
         </el-breadcrumb-item>
         <el-breadcrumb-item>{{ course.title }}</el-breadcrumb-item>
       </el-breadcrumb>
-      <!-- 播放器 -->
+      <!-- 课程资源展示区 (替代播放器) -->
       <div style="position: relative;width: 100%">
-        <v-course-player ref="CoursePlayer" />
+        <v-course-resource ref="CourseResource" :teacher="teacher" />
         <!-- 付费课程订阅栏 -->
         <div v-if="showBuyBanner" class="sub-course">
           <div>
@@ -22,7 +22,7 @@
             <div style="color: #999;font-size: 13px;margin-top: 5px">
               <span style="margin-right: 26px">{{ course.lessonNum }} 总课时</span>
               <span style="margin-right: 26px">{{ course.buyCount }} 人订阅过</span>
-              <span>{{ course.viewCount }} 人观看过</span>
+              <span>{{ course.viewCount }} 人查看过</span>
             </div>
           </div>
           <div style="margin-left: auto">
@@ -39,12 +39,18 @@
           </div>
         </div>
       </div>
-      <!-- 课程简介、评价 -->
+      <!-- 课程简介、评价、课表、成绩 -->
       <div class="clearfix" style="margin-top: 20px">
         <div style="width: 73%;background-color: #fff;padding: 10px 20px;float: left;">
-          <el-tabs>
-            <el-tab-pane label="课程概述" class="course-descriptiont" v-html="course.description" />
-            <el-tab-pane label="课程评价" lazy>
+          <el-tabs v-model="activeTab">
+            <el-tab-pane label="课程概述" name="desc" class="course-descriptiont" v-html="course.description" />
+            <el-tab-pane label="上课安排" name="schedule" lazy>
+              <v-course-schedule :course-id="course.id" />
+            </el-tab-pane>
+            <el-tab-pane label="课程成绩" name="grade" lazy>
+              <v-course-grade :course-id="course.id" :is-buy="!showBuyBanner" />
+            </el-tab-pane>
+            <el-tab-pane label="课程评价" name="comment" lazy>
               <v-course-comment :course="course" />
             </el-tab-pane>
           </el-tabs>
@@ -118,17 +124,20 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'Course',
   components: {
-    'v-course-player': () => import('@/components/course/course_player'),
+    'v-course-resource': () => import('@/components/course/course_resource'),
     'v-course-comment': () => import('@/components/course/course_comment'),
+    'v-course-schedule': () => import('@/components/course/course_schedule'),
+    'v-course-grade': () => import('@/components/course/course_grade'),
     MvCountDown
   },
   data() {
     return {
-      course: {},
+      course: { id: 0 },
       teacher: {},
       buyCourseDialogVisible: false,
       orderNo: '',
-      isBuyTheCourse: false
+      isBuyTheCourse: false,
+      activeTab: 'desc'
     }
   },
   computed: {
@@ -148,9 +157,11 @@ export default {
         this.course = resp.data
         // 获取讲师信息
         this.getTeacher(this.course.teacherId)
-        // 初始化播放器
+        // 初始化资源展示
         setTimeout(function() {
-          this.$refs.CoursePlayer.setData(this.course)
+          if (this.$refs.CourseResource) {
+            this.$refs.CourseResource.setData(this.course)
+          }
         }.bind(this), 100)
       })
     },
@@ -178,7 +189,6 @@ export default {
     },
     openBuyCourseDialog() {
       if (this.user === null || Object.keys(this.user).length === 0) {
-        // this.$message.info('请登录后再操作')
         this.$login()
         return
       }
@@ -200,6 +210,7 @@ export default {
         orderPaySucceed(this.orderNo).then(resp => {
           this.$message.success(resp.message)
           this.buyCourseDialogVisible = false
+          this.isBuyTheCourse = true
         })
       }
     },

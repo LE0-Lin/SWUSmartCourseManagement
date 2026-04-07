@@ -119,6 +119,28 @@ export const constantRoutes = [
       meta: { title: '评论管理', icon: 'comment' }
     }]
   },
+  // 成绩管理
+  {
+    path: '/grade',
+    component: Layout,
+    children: [{
+      path: 'index',
+      name: 'GradeIndex',
+      component: () => import('@/views/grade/index'),
+      meta: { title: '成绩管理', icon: 'el-icon-s-marketing' }
+    }]
+  },
+  // 课表管理
+  {
+    path: '/schedule',
+    component: Layout,
+    children: [{
+      path: 'index',
+      name: 'ScheduleIndex',
+      component: () => import('@/views/schedule/index'),
+      meta: { title: '课表管理', icon: 'el-icon-date' }
+    }]
+  },
   // 更新课程信息
   {
     path: '/course-update',

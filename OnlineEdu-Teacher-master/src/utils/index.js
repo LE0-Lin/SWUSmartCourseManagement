@@ -190,6 +190,9 @@ export function isEmpty(...str) {
  * @returns {string}
  */
 export function encodeOssFileUri(ossUri = '') {
+  if (ossUri.startsWith('/api/pub/image/')) {
+    ossUri = 'http://localhost:9096' + ossUri
+  }
   const i = ossUri.lastIndexOf('/')
   const prefix = ossUri.substring(0, i + 1)
   const suffix = ossUri.substring(i + 1)

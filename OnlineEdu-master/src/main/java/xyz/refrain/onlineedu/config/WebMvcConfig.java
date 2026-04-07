@@ -33,6 +33,12 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@org.springframework.beans.factory.annotation.Value("${storage.local-path}")
+	private String localPath;
+
+	@org.springframework.beans.factory.annotation.Value("${storage.access-path}")
+	private String accessPath;
+
 	/**
 	 * 监听HTTP请求事件
 	 * 解决 RequestContextHolder.getRequestAttributes() 空指针问题
@@ -60,6 +66,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 
 	@Override
 	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+		// local storage
+		registry.addResourceHandler(accessPath + "**")
+				.addResourceLocations("file:" + localPath);
 
 		// swagger-ui doc enable
 		registry.addResourceHandler("swagger-ui.html")

@@ -63,6 +63,12 @@ public class ContentController {
 	private EduVideoService eduVideoService;
 
 	@Autowired
+	private EduGradeService eduGradeService;
+
+	@Autowired
+	private EduCourseScheduleService eduCourseScheduleService;
+
+	@Autowired
 	private EduCommentService eduCommentService;
 
 	@Autowired
@@ -138,11 +144,27 @@ public class ContentController {
 		return RUtils.success("章节列表信息", list);
 	}
 
-	@GetMapping("/get/videos/{chapterId}")
-	@ApiOperation("获取章节视频")
-	public R getChapterVideos(@PathVariable("chapterId") @Min(1) Integer chapterId) {
+	@GetMapping("/get/resources/{chapterId}")
+	@ApiOperation("获取章节资源")
+	public R getChapterResources(@PathVariable("chapterId") @Min(1) Integer chapterId) {
 		List<EduVideoVO> list = eduVideoService.listVideos(chapterId);
-		return RUtils.success("章节视频列表信息", list);
+		return RUtils.success("章节资源列表信息", list);
+	}
+
+	@GetMapping("/get/grade/{courseId}")
+	@ApiOperation("获取学员课程成绩")
+	public R getGrade(@PathVariable("courseId") @Min(1) Integer courseId, HttpServletRequest request) {
+		UctrMemberDetail member = SessionUtils.getMember(request);
+		if (Objects.isNull(member)) {
+			return new R(RS.NOT_LOGIN.status(), "请登录后再操作");
+		}
+		return eduGradeService.getStudentGrade(courseId, member.getId());
+	}
+
+	@GetMapping("/get/schedule/{courseId}")
+	@ApiOperation("获取课程安排信息")
+	public R getSchedule(@PathVariable("courseId") @Min(1) Integer courseId) {
+		return eduCourseScheduleService.getScheduleByCourseId(courseId);
 	}
 
 	@PostMapping("/get/video/auth")

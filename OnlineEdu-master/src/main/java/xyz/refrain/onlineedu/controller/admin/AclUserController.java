@@ -17,6 +17,7 @@ import xyz.refrain.onlineedu.model.securtiy.AclUserDetail;
 import xyz.refrain.onlineedu.model.vo.R;
 import xyz.refrain.onlineedu.model.vo.admin.AclUserVO;
 import xyz.refrain.onlineedu.service.AclUserService;
+import xyz.refrain.onlineedu.utils.RUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -37,10 +38,12 @@ public class AclUserController {
 	private AclUserService aclUserService;
 
 	@TimeCost
-	@AccessLimit(maxCount = 3, seconds = 300)
 	@PostMapping("/login")
 	@ApiOperation("登录")
-	public R login(@RequestBody @Valid LoginParam param) {
+	public R login(@RequestBody LoginParam param) {
+		if (param == null || param.getUsername() == null || param.getPassword() == null) {
+			return RUtils.fail("用户名和密码不能为空");
+		}
 		return aclUserService.login(param);
 	}
 

@@ -1,103 +1,99 @@
 package xyz.refrain.onlineedu.service;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileNameUtil;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.model.PutObjectResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import xyz.refrain.onlineedu.config.properties.AliyunOssProperties;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Aliyun Oss Service
+ * 本地文件存储服务 (替代 Aliyun Oss)
  *
- * @author Myles Yang
+ * @author Gemini CLI
  */
 @Service
 @Slf4j
 public class AliyunOssService {
 
-	public static final String IllegalCharsInFileName = "[\\\\/:*?\"<>|]";
+    @Value("${storage.local-path}")
+    private String localPath;
 
-	@Autowired
-	private OSS ossClient;
+    @Value("${storage.access-path}")
+    private String accessPath;
 
-	@Autowired
-	private AliyunOssProperties ossProperties;
+    /**
+     * 上传文件到本地
+     *
+     * @param file 文件
+     * @return 文件访问路径，失败返回空字符串
+     */
+    public String upload(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return "";
+        }
+        try {
+            // 生成唯一文件名
+            String originalFilename = file.getOriginalFilename();
+            String mainName = FileNameUtil.mainName(originalFilename);
+            String extName = FileNameUtil.extName(originalFilename);
+            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+            String newFileName = mainName + "-" + uuid + "." + extName;
 
+            // 确保目录存在
+            File destDir = new File(localPath);
+            if (!destDir.exists()) {
+                destDir.mkdirs();
+            }
 
-	/**
-	 * 上传文件
-	 *
-	 * @param file 文件
-	 * @return 文件访问路径，失败返回空字符串
-	 */
-	public String upload(MultipartFile file) {
-		try {
-			String fileKey = getFileKey(file.getOriginalFilename());
-			// Mocked: skip putObject to avoid Aliyun connection timeouts when using dummy keys
-			log.info("Mock OSS upload for file: {}", fileKey);
-			return "http://dummy.aliyuncs.com/" + fileKey;
-		} catch (Exception e) {
-			log.error("上传文件失败", e.getCause());
-		}
-		return "";
-	}
+            // 保存文件
+            File destFile = new File(destDir, newFileName);
+            file.transferTo(destFile);
+            
+            log.info("文件上传至本地成功: {}", destFile.getAbsolutePath());
+            return accessPath + newFileName;
+        } catch (IOException e) {
+            log.error("上传文件到本地失败", e);
+        }
+        return "";
+    }
 
-	/**
-	 * 根据 url 删除oss文件
-	 */
-	public boolean delete(String ossFileUrl) {
-		if (!StringUtils.hasText(ossFileUrl)) {
-			return false;
-		}
-		String fileKey = getOssFileKey(ossFileUrl);
-		try {
-			ossClient.deleteObject(ossProperties.getBucketName(), fileKey);
-			return true;
-		} catch (Exception e) {
-			log.error("删除文件失败", e.getCause());
-		}
-		return false;
-	}
+    /**
+     * 根据 url 删除本地文件
+     */
+    public boolean delete(String fileUrl) {
+        if (!StringUtils.hasText(fileUrl)) {
+            return false;
+        }
+        try {
+            String fileName = getOssFileKey(fileUrl);
+            File file = new File(localPath, fileName);
+            if (file.exists()) {
+                return file.delete();
+            }
+        } catch (Exception e) {
+            log.error("删除本地文件失败", e);
+        }
+        return false;
+    }
 
-	/**
-	 * 根据 url 获得 oss 文件 key
-	 */
-	public String getOssFileKey(String ossFileUrl) {
-		if (!StringUtils.hasText(ossFileUrl)) {
-			return "";
-		}
-		int i = ossFileUrl.lastIndexOf('/');
-		if (i > 0) {
-			return ossFileUrl.substring(i + 1);
-		}
-		return "";
-	}
-
-	/**
-	 * 获得保存在 oss 的文件key
-	 * 格式 yyyyMMdd-fileName-uuid.ext
-	 */
-	private String getFileKey(String fileName) {
-
-		String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-		String uuid = org.apache.commons.lang3.StringUtils.remove(UUID.randomUUID().toString(), '-');
-
-		String mainName = FileNameUtil.mainName(fileName);
-		mainName = mainName.replaceAll(IllegalCharsInFileName, "");
-		String extName = FileNameUtil.extName(fileName);
-
-		String newFileName = mainName + "-" + uuid + "." + extName;
-
-		return date + "-" + newFileName;
-	}
+    /**
+     * 根据 url 获得文件名
+     */
+    public String getOssFileKey(String fileUrl) {
+        if (!StringUtils.hasText(fileUrl)) {
+            return "";
+        }
+        int i = fileUrl.lastIndexOf('/');
+        if (i >= 0) {
+            return fileUrl.substring(i + 1);
+        }
+        return fileUrl;
+    }
 
 }

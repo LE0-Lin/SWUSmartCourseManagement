@@ -68,7 +68,7 @@ export function getIsBuyCourse(id) {
   })
 }
 
-// 获取课程章节
+// 获取课程章节/目录
 export function getChapters(courseId) {
   return request({
     url: `${api_prefix}/get/chapters/${courseId}`,
@@ -76,20 +76,27 @@ export function getChapters(courseId) {
   })
 }
 
-// 获取章节视频
-export function getChapterVideos(chapterId) {
+// 获取章节资源（原视频列表）
+export function getChapterResources(chapterId) {
   return request({
-    url: `${api_prefix}/get/videos/${chapterId}`,
+    url: `${api_prefix}/get/resources/${chapterId}`,
     method: 'get'
   })
 }
 
-// 获取视频播放凭证
-export function getVideoPlayAuth(data) {
+// 获取课程成绩
+export function getCourseGrade(courseId) {
   return request({
-    url: `${api_prefix}/get/video/auth`,
-    method: 'post',
-    data
+    url: `${api_prefix}/get/grade/${courseId}`,
+    method: 'get'
+  })
+}
+
+// 获取课程安排/课表
+export function getCourseSchedule(courseId) {
+  return request({
+    url: `${api_prefix}/get/schedule/${courseId}`,
+    method: 'get'
   })
 }
 

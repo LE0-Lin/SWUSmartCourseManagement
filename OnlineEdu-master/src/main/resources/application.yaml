@@ -18,6 +18,11 @@ spring:
     password: ""
     timeout: 3000
 
+# storage configuration
+storage:
+  local-path: E:/SmartCourse/uploads/
+  access-path: /api/pub/image/
+
 mybatis-plus:
   configuration:
     # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
