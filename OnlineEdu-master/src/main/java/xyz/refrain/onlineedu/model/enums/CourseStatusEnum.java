@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * Course Status
  *
- * @author Myles Yang
+ * @author SWU
  */
 public enum CourseStatusEnum {
 

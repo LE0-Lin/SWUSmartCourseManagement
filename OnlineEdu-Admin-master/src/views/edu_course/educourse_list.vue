@@ -16,12 +16,6 @@
             @change="subjectOptionsChange"
           />
         </el-form-item>
-        <el-form-item label="是否免费：" prop="free">
-          <el-select v-model="searchParams.free" style="width: 130px">
-            <el-option label="免费" :value="true" />
-            <el-option label="收费" :value="false" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="状态：" prop="enable">
           <el-select v-model="searchParams.enable" style="width: 130px">
             <el-option label="上架" :value="true" />
@@ -54,9 +48,7 @@
             {{ getDetailsSubject(scope.row.subjectParent) }}
           </template>
         </el-table-column>
-        <el-table-column prop="price" label="价格" width="100">
-          <template slot-scope="scope">{{ scope.row.price === 0 ? '免费' : scope.row.price }}</template>
-        </el-table-column>
+        <el-table-column prop="credit" label="学分" width="80" align="center" />
         <el-table-column prop="lessonNum" label="总课时" width="100" />
         <el-table-column prop="sort" label="排序" width="80" align="center" />
         <el-table-column prop="enable" label="上下架" width="180" align="center">
@@ -163,7 +155,6 @@ export default {
         teacherId: null,
         subjectId: null,
         title: '',
-        free: null,
         status: 'PUBLISH', // 显示通过审核的
         enable: null
       },

@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 /**
  * Aliyun Oss Properties
  *
- * @author Myles Yang
+ * @author SWU
  */
 
 @Setter

@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 /**
  * 评论 VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

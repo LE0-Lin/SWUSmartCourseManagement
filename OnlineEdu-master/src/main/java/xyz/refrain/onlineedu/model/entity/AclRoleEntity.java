@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  *
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-02
  */
 @Data

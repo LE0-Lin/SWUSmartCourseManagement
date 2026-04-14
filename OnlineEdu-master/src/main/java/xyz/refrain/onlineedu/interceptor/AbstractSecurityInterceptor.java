@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 抽象的安全拦截器
  *
- * @author Myles Yang
+ * @author SWU
  */
 public abstract class AbstractSecurityInterceptor {
 	/**

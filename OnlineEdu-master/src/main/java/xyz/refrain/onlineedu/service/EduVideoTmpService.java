@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * 视频 service（用于讲师二次修改课程）
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

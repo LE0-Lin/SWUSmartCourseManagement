@@ -26,8 +26,9 @@ const mutations = {
 const actions = {
   // user login
   login({ commit, dispatch }, userInfo) {
+    const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login(userInfo).then(response => {
+      login({ username: username.trim(), password: password.trim() }).then(response => {
         const { data } = response
         commit('SET_USER', data)
         commit('SET_TOKEN', data.token)
@@ -40,14 +41,12 @@ const actions = {
   },
 
   // get user info
-  getInfo({ commit, dispatch }) {
-    const token = localStorage.getItem('token')
-    commit('SET_TOKEN', token)
+  getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo().then(response => {
-        const { status, data } = response
-        if (status !== 200) {
-          return reject('用户未认证，请登录！')
+        const { data } = response
+        if (!data) {
+          return reject('验证失败，请重新登录')
         }
         commit('SET_USER', data)
         resolve(data)
@@ -65,14 +64,18 @@ const actions = {
   logout({ commit }) {
     return new Promise((resolve, reject) => {
       logout().then(() => {
-        // removeToken() // must remove  token  first
         localStorage.removeItem('token')
         store.dispatch('resetRouters')
         resetRouter()
         commit('RESET_STATE')
         resolve()
       }).catch(error => {
-        reject(error)
+        // 即使后端登出失败，前端也要清理状态
+        localStorage.removeItem('token')
+        store.dispatch('resetRouters')
+        resetRouter()
+        commit('RESET_STATE')
+        resolve()
       })
     })
   }
@@ -84,4 +87,3 @@ export default {
   mutations,
   actions
 }
-

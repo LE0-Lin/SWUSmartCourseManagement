@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * 课程订阅-学员关系表
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-14
  */
 @Data

@@ -8,7 +8,7 @@ import xyz.refrain.onlineedu.model.entity.EduChapterTmpEntity;
  * 课程章节临时表（用于存放二次修改的数据） Mapper 接口
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-24
  */
 public interface EduChapterTmpMapper extends BaseMapper<EduChapterTmpEntity> {

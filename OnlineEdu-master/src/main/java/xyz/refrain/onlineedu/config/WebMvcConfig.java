@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * WebMvc配置
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
@@ -141,8 +141,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 	public View error() {
 		// return new MappingJackson2JsonView();
 		return (model, request, response) -> {
+			Object path = model.get("path");
+			System.err.println("DEBUG: 404 Error! Request path not found: [" + path + "]");
 			RWriterUtils.writeJson(response,
-					RUtils.fail(RS.PAGE_NOT_FOUND, model.get("path")));
+					RUtils.fail(RS.PAGE_NOT_FOUND, path));
 		};
 	}
 

@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * 前台学员控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AppUctrMemberController")

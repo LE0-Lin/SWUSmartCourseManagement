@@ -14,7 +14,7 @@ import java.io.Serializable;
 /**
  * Edu Teacher Simple VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 
 @ToString(callSuper = true)

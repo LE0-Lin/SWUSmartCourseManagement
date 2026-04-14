@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 前台登录安全拦截器
  *
- * @author Myles Yang
+ * @author SWU
  */
 public class AppSecurityInterceptor extends AbstractSecurityInterceptor implements HandlerInterceptor {
 

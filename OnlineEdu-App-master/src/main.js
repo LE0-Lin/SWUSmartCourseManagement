@@ -36,15 +36,14 @@ router.beforeEach(async(to, from, next) => {
     document.title = to.meta.title + ' | ' + name
   }
   const isLogin = store.getters.user !== null && Object.keys(store.getters.user).length !== 0
-  if (preventGetInfo || isLogin) {
+  // 登录页面不需要登录
+  if (to.path === '/login') {
+    next()
+  } else if (isLogin) {
     next()
   } else {
-    await store.dispatch('user/getInfo').then(() => {
-      next()
-    }).catch(() => {
-      preventGetInfo = true
-      next()
-    })
+    // 未登录，跳转到登录页面
+    next({ path: '/login' })
   }
   // 关闭消息提示
   Message.closeAll()

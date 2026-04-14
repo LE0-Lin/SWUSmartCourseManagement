@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 /**
  * Member VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

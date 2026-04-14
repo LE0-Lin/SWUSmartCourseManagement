@@ -14,7 +14,7 @@ import xyz.refrain.onlineedu.config.properties.AliyunVodProperties;
 /**
  * Aliyun Config
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Configuration
 public class AliyunConfig {

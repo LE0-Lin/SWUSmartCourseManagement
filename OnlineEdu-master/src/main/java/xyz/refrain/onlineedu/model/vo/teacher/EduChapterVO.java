@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * 章节 VO （临时表，二次修改）
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

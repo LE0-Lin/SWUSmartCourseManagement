@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * 管理员端章节控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminEduChapterController")

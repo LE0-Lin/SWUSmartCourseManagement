@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Aliyun Vod Service
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

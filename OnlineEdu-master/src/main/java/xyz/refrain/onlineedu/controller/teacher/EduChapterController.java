@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 讲师端章节控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduChapterController")

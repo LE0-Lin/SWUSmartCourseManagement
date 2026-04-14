@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * 消息service
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

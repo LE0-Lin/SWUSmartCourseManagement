@@ -8,7 +8,7 @@ import xyz.refrain.onlineedu.model.entity.EduVideoTmpEntity;
  * 课程视频表（用于存放二次修改的数据） Mapper 接口
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-24
  */
 public interface EduVideoTmpMapper extends BaseMapper<EduVideoTmpEntity> {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-breadcrumb class="app-breadcrumb" separator="/">
     <transition-group name="breadcrumb">
       <el-breadcrumb-item v-for="(item,index) in levelList" :key="item.path">
@@ -48,7 +48,7 @@ export default {
       return name.trim().toLocaleLowerCase() === 'Dashboard'.toLocaleLowerCase()
     },
     pathCompile(path) {
-      // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
+      // To solve this problem https://github.com/SWU/vue-element-admin/issues/561
       const { params } = this.$route
       var toPath = pathToRegexp.compile(path)
       return toPath(params)

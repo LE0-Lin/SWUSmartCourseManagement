@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 /**
  * Uctr Member Search Param
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

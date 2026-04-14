@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * 学生成绩表
  * </p>
  *
- * @author Gemini CLI
+ * @author SWU
  * @since 2026-04-07
  */
 @Data

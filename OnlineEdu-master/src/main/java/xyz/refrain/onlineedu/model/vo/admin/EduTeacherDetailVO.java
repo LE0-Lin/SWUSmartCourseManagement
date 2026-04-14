@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Length;
 /**
  * Edu Teacher Detail VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

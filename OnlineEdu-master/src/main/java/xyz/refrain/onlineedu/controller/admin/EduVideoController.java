@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * 管理员端视频控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminEduVideoController")

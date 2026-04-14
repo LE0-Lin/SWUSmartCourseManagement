@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * Banner控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminHmBannerController")

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * Edu Subject Service
  * 课程科目(分类)
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

@@ -36,3 +36,13 @@ export function updatePassword(data) {
   })
 }
 
+// 修改头像
+export function updateAvatar(data) {
+  return request({
+    url: `${api_prefix}/update/avatar`,
+    method: 'post',
+    headers: { 'Content-Type': 'multipart/form-data' },
+    data
+  })
+}
+

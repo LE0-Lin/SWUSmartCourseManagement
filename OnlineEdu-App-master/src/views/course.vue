@@ -12,16 +12,16 @@
       <!-- 课程资源展示区 (替代播放器) -->
       <div style="position: relative;width: 100%">
         <v-course-resource ref="CourseResource" :teacher="teacher" />
-        <!-- 付费课程订阅栏 -->
-        <div v-if="showBuyBanner" class="sub-course">
+        <!-- 课程选课栏 -->
+        <div v-if="showSelectBanner" class="sub-course">
           <div>
             <div style="color: #fff;font-size: 20px;">
               {{ course.title }}
-              <span style="color: #ff4f23;margin-left: 20px;">￥{{ course.price }}</span>
             </div>
             <div style="color: #999;font-size: 13px;margin-top: 5px">
               <span style="margin-right: 26px">{{ course.lessonNum }} 总课时</span>
-              <span style="margin-right: 26px">{{ course.buyCount }} 人订阅过</span>
+              <span style="margin-right: 26px">{{ course.credit }} 学分</span>
+              <span style="margin-right: 26px">{{ course.buyCount }} 人选修过</span>
               <span>{{ course.viewCount }} 人查看过</span>
             </div>
           </div>
@@ -31,9 +31,9 @@
                 type="primary"
                 style="width: 18vw;font-size: 18px"
                 icon="el-icon-plus"
-                @click="openBuyCourseDialog"
+                @click="openSelectCourseDialog"
               >
-                加入学习
+                选择课程
               </el-button>
             </div>
           </div>
@@ -80,44 +80,12 @@
         </div>
       </div>
     </el-col>
-    <el-dialog
-      :title="`支付订单《${course.title}》`"
-      :visible.sync="buyCourseDialogVisible"
-      :close-on-click-modal="false"
-      append-to-body
-      destroy-on-close
-      width="36vw"
-    >
-      <div style="margin-bottom: 12px">
-        <span> 订单编号: {{ orderNo }}</span>
-        <span style="margin-left: 24px">金额:
-          <span style="color: #ff4f23">￥{{ course.price }}</span>
-        </span>
-      </div>
-      <div style="text-align: center;font-size: 16px">
-        请在以下时间内完成支付:
-        <mv-count-down
-          style="margin-top: 7px"
-          :start-time="new Date().getTime()"
-          :end-time="new Date().getTime() + 1800000"
-          end-text="支付订阅已经过期，请关闭再打开刷新"
-          :hour-txt="'小时'"
-          :minutes-txt="'分钟'"
-          :seconds-txt="'秒'"
-          :is-start="true"
-        />
-      </div>
-      <div style="margin: 36px 0 50px 0;text-align: center">
-        <el-button type="primary" icon="el-icon-shopping-cart-2" style="width: 16vw;font-size: 20px" @click="buyCourse">
-          点击支付
-        </el-button>
-      </div>
-    </el-dialog>
+
   </el-row>
 </template>
 
 <script>
-import { getCourseDetail, getTeacher, getIsBuyCourse, createOrder, orderPaySucceed } from '@/api/content'
+import { getCourseDetail, getTeacher, getIsSelectCourse, selectCourse } from '@/api/content'
 import MvCountDown from 'mv-count-down'
 import { mapGetters } from 'vuex'
 
@@ -134,27 +102,54 @@ export default {
     return {
       course: { id: 0 },
       teacher: {},
-      buyCourseDialogVisible: false,
-      orderNo: '',
-      isBuyTheCourse: false,
-      activeTab: 'desc'
+      selectCourseDialogVisible: false,
+      isSelectTheCourse: false,
+      activeTab: 'desc',
+      currentSemester: ''
     }
   },
   computed: {
     ...mapGetters(['user']),
-    showBuyBanner: function() {
-      return !(this.course.price === 0 || this.isBuyTheCourse)
+    showSelectBanner: function() {
+      return !this.isSelectTheCourse && this.course.semester === this.currentSemester
     }
   },
   created() {
+    this.getCurrentSemester()
     const courseId = this.$route.params.id
     this.getCourseData(courseId)
-    this.getIsBuyCourse(courseId)
+    this.getIsSelectCourse(courseId)
   },
   methods: {
+    getCurrentSemester() {
+      const now = new Date()
+      const month = now.getMonth() + 1
+      this.currentSemester = (month >= 2 && month <= 7) ? 'autumn' : 'spring'
+    },
     getCourseData(id) {
-      getCourseDetail(id).then(resp => {
-        this.course = resp.data
+      // 使用模拟数据实现课程详情
+      setTimeout(() => {
+        this.course = {
+          id: parseInt(id),
+          title: '高等数学',
+          teacherId: 1,
+          teacher: '张老师',
+          subject: '数学',
+          subjectParent: { title: '公共课', parent: null },
+          semester: this.currentSemester,
+          courseType: 'public',
+          majors: [],
+          cover: 'https://c-ssl.duitang.com/uploads/item/201912/05/20191205152830_ULrYx.thumb.300_0.jpeg',
+          description: '<h3>课程简介</h3><p>高等数学是大学数学的基础课程，主要包括微积分、线性代数等内容。本课程旨在培养学生的数学思维能力和解决实际问题的能力。</p><h3>课程目标</h3><ul><li>掌握微积分的基本概念和方法</li><li>培养数学建模和问题解决能力</li><li>为后续专业课程学习打下基础</li></ul>',
+          credit: 4,
+          lessonNum: 64,
+          duration: '16周',
+          status: 'ongoing',
+          buyCount: 120,
+          viewCount: 350,
+          selectStartTime: new Date().toISOString(),
+          selectEndTime: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        }
         // 获取讲师信息
         this.getTeacher(this.course.teacherId)
         // 初始化资源展示
@@ -163,20 +158,28 @@ export default {
             this.$refs.CourseResource.setData(this.course)
           }
         }.bind(this), 100)
-      })
+      }, 500)
     },
     getTeacher(id) {
-      getTeacher(id).then(resp => {
-        this.teacher = resp.data
-      })
+      // 使用模拟数据实现教师信息
+      setTimeout(() => {
+        this.teacher = {
+          id: 1,
+          name: '张老师',
+          avatar: 'https://c-ssl.duitang.com/uploads/item/201912/05/20191205152830_ULrYx.thumb.300_0.jpeg',
+          email: 'zhang@example.com',
+          intro: '张老师拥有数学博士学位，从事高等数学教学工作10余年，教学经验丰富，曾获校级优秀教师称号。'
+        }
+      }, 300)
     },
-    getIsBuyCourse(id) {
+    getIsSelectCourse(id) {
       if (this.user === null || Object.keys(this.user).length === 0) {
         return
       }
-      getIsBuyCourse(id).then(resp => {
-        this.isBuyTheCourse = resp.data
-      })
+      // 使用模拟数据实现是否已选课
+      setTimeout(() => {
+        this.isSelectTheCourse = false
+      }, 300)
     },
     getDetailsSubject(subjectParent) {
       let subject = []
@@ -187,32 +190,41 @@ export default {
       }
       return subject
     },
-    openBuyCourseDialog() {
+    openSelectCourseDialog() {
       if (this.user === null || Object.keys(this.user).length === 0) {
         this.$login()
         return
       }
-      // 创建订单
-      const params = {
-        courseId: this.course.id,
-        memberId: this.user.id,
-        totalFee: this.course.price
+      
+      if (this.course.semester !== this.currentSemester) {
+        this.$message.warning('该课程不在当前学期开设，无法选择')
+        return
       }
-      createOrder(params).then(resp => {
-        this.$message({ message: resp.message, type: 'success', customClass: 'elmessage' })
-        this.orderNo = resp.data
-        this.buyCourseDialogVisible = true
-      })
-    },
-    // 支付订单成功
-    buyCourse() {
-      if (this.orderNo) {
-        orderPaySucceed(this.orderNo).then(resp => {
-          this.$message.success(resp.message)
-          this.buyCourseDialogVisible = false
-          this.isBuyTheCourse = true
-        })
+      
+      // 检查选课时间限制
+      const now = new Date()
+      if (this.course.selectStartTime && new Date(this.course.selectStartTime) > now) {
+        this.$message.warning('选课尚未开始，请在规定时间内选课')
+        return
       }
+      if (this.course.selectEndTime && new Date(this.course.selectEndTime) < now) {
+        this.$message.warning('选课已结束，请等待下次选课时间')
+        return
+      }
+      
+      // 检查专业限制
+      if (this.course.courseType === 'major' && this.course.majors && this.course.majors.length > 0) {
+        if (!this.user.major || !this.course.majors.includes(this.user.major)) {
+          this.$message.warning('该课程仅限特定专业学生选择')
+          return
+        }
+      }
+      
+      // 使用模拟数据实现选课
+      setTimeout(() => {
+        this.$message.success('选课成功！')
+        this.isSelectTheCourse = true
+      }, 500)
     },
     linkToTeacher(tid) {
       this.$router.push({

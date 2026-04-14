@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div v-if="!item.hidden">
     <template
       v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow"
@@ -53,7 +53,7 @@ export default {
     }
   },
   data() {
-    // To fix https://github.com/PanJiaChen/vue-admin-template/issues/237
+    // To fix https://github.com/SWU/vue-admin-template/issues/237
     // TODO: refactor with render function
     this.onlyOneChild = null
     return {}

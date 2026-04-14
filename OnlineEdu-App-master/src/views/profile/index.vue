@@ -24,6 +24,24 @@
                 <span slot="label"><i class="tabs-icon el-icon-lock" />登录密码</span>
                 <v-r-password />
               </el-tab-pane>
+              <!-- 我的课表 -->
+              <el-tab-pane>
+                <span slot="label"><i class="tabs-icon el-icon-s-grid" />我的课表</span>
+                <div class="schedule-tab">
+                  <el-button type="primary" @click="goToSchedule" style="margin: 20px 0">
+                    <i class="el-icon-s-grid"></i> 查看课表
+                  </el-button>
+                </div>
+              </el-tab-pane>
+              <!-- 我的成绩单 -->
+              <el-tab-pane>
+                <span slot="label"><i class="tabs-icon el-icon-document"></i> 我的成绩单</span>
+                <div class="transcript-tab">
+                  <el-button type="primary" @click="goToTranscript" style="margin: 20px 0">
+                    <i class="el-icon-document"></i> 查看成绩单
+                  </el-button>
+                </div>
+              </el-tab-pane>
             </el-tabs>
           </el-card>
         </el-col>
@@ -45,7 +63,14 @@ export default {
     return {}
   },
 
-  methods: {}
+  methods: {
+    goToSchedule() {
+      this.$router.push('/user/schedule')
+    },
+    goToTranscript() {
+      this.$router.push('/user/transcript')
+    }
+  }
 }
 </script>
 

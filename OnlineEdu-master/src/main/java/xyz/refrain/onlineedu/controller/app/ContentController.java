@@ -39,7 +39,7 @@ import java.util.Objects;
 /**
  * 前台内容控制器（无需登录即可获取数据）
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AppContentController")

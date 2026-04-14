@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 /**
  * 学员订单
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

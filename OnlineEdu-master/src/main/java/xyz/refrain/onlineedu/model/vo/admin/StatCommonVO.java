@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * 普通的网站统计字段信息
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Accessors(chain = true)
 @Data

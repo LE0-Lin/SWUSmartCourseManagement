@@ -10,6 +10,24 @@
           <span class="score-label">最终得分：</span>
           <span class="score-value" :class="getScoreClass(grade.score)">{{ grade.score }}</span>
         </div>
+        <div class="score-details" v-if="grade.details">
+          <div class="detail-item" v-if="grade.details.usual !== undefined && grade.details.usualRatio > 0">
+            <span class="detail-label">平时分：</span>
+            <span class="detail-value">{{ grade.details.usual }}（{{ grade.details.usualRatio }}%）</span>
+          </div>
+          <div class="detail-item" v-if="grade.details.experiment !== undefined && grade.details.experimentRatio > 0">
+            <span class="detail-label">实验分：</span>
+            <span class="detail-value">{{ grade.details.experiment }}（{{ grade.details.experimentRatio }}%）</span>
+          </div>
+          <div class="detail-item" v-if="grade.details.midterm !== undefined && grade.details.midtermRatio > 0">
+            <span class="detail-label">期中：</span>
+            <span class="detail-value">{{ grade.details.midterm }}（{{ grade.details.midtermRatio }}%）</span>
+          </div>
+          <div class="detail-item" v-if="grade.details.final !== undefined && grade.details.finalRatio > 0">
+            <span class="detail-label">期末：</span>
+            <span class="detail-value">{{ grade.details.final }}（{{ grade.details.finalRatio }}%）</span>
+          </div>
+        </div>
         <div class="score-info">
           更新时间：{{ grade.updateTime || '暂无数据' }}
         </div>
@@ -93,6 +111,32 @@ export default {
     &.excellent { color: #67c23a; }
     &.pass { color: #409eff; }
     &.fail { color: #f56c6c; }
+  }
+}
+
+.score-details {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .detail-label {
+    color: #606266;
+  }
+  
+  .detail-value {
+    font-weight: 500;
+    color: #303133;
   }
 }
 

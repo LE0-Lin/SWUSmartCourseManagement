@@ -9,12 +9,12 @@
               <div class="title ellipse" :title="course.title">{{ course.title }}</div>
               <div class="middle">
                 <span class="course-num">共{{ course.lessonNum }}节</span>
+                <span class="credit">{{ course.credit }}学分</span>
                 &nbsp;|&nbsp;
                 <span class="tch">{{ course.teacherName }}</span>
               </div>
               <div class="bottom">
-                <span class="free">{{ course.price === 0 ? '免费' : `￥${course.price}` }}</span>
-                <span class="sub-num">共{{ course.buyCount }}人订阅</span>
+                <span class="sub-num">共{{ course.buyCount }}人选修</span>
               </div>
             </div>
           </div>
@@ -81,15 +81,9 @@ export default {
     }
 
     .bottom {
-      .free {
-        font-size: 14px;
-        color: #f4621f;
-      }
-
       .sub-num {
         font-size: 12px;
         color: #999;
-        margin-left: 16px;
       }
     }
   }

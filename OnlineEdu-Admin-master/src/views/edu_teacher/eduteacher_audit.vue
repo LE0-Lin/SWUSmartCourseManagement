@@ -43,7 +43,6 @@
         <el-table-column label="操作" width="280">
           <template slot-scope="scope">
             <el-button type="primary" size="mini" @click="openUpdateProfileDialog(scope.$index)">修改</el-button>
-            <el-button type="info" size="mini" @click="openViewResumeDialog(scope.$index)">预览</el-button>
             <el-popconfirm
               style="margin-left: 10px"
               placement="top-end"
@@ -96,30 +95,7 @@
         <el-button size="small" @click="updateProfileDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
-    <!-- 预览简历 -->
-    <el-dialog
-      :title="viewResumeDialogTitle"
-      :visible.sync="viewResumeDialogVisible"
-      destroy-on-close
-      width="60vw"
-      top="5vh"
-    >
-      <div style="height: 80vh;overflow: auto">
-        <div style="margin-bottom: 20px">
-          <el-link :underline="false" :href="listData[currentOperationIndex] ? listData[currentOperationIndex].resume : ''" target="_blank">
-            <i class="el-icon-link" />
-            在浏览器新标签打开
-          </el-link>
-        </div>
-        <div v-if="isPdf">
-          <div style="text-align: center;padding: 30px;font-size: 20px">
-            该文件是PDF格式，请点击上方链接在新标签页中预览。
-          </div>
-        </div>
-        <img v-else-if="isImg" style="width: 100%" :src="listData[currentOperationIndex] ? listData[currentOperationIndex].resume : ''" alt="">
-        <div v-else style="text-align: center;padding: 30px;font-size: 26px">加载失败</div>
-      </div>
-    </el-dialog>
+
   </div>
 </template>
 
@@ -148,31 +124,10 @@ export default {
       // 修改
       updateProfileDialogVisible: false,
       updateProfileDialogTitle: '',
-      // 浏览简历
-      viewResumeDialogVisible: false,
-      viewResumeDialogTitle: '',
-      pdfSrc: null,
-      pdfPages: undefined
+
     }
   },
-  computed: {
-    isImg() {
-      try {
-        const resume = this.listData[this.currentOperationIndex].resume || ''
-        return /^.*\.(jpg|jpeg|png)$/i.test(resume)
-      } catch (e) {
-        return false
-      }
-    },
-    isPdf() {
-      try {
-        const resume = this.listData[this.currentOperationIndex].resume || ''
-        return /^.*\.(pdf)$/i.test(resume)
-      } catch (e) {
-        return false
-      }
-    }
-  },
+
   created() {
     this.getList()
   },
@@ -194,13 +149,7 @@ export default {
         this.$refs.UpdateDialog.setData(user)
       }.bind(this), 100)
     },
-    openViewResumeDialog(index) {
-      this.viewResumeDialogVisible = true
-      const user = this.setIndexAndGetListData(index)
-      this.viewResumeDialogTitle = `预览讲师[${user.name}]简历`
-      this.pdfSrc = null
-      this.pdfPages = undefined
-    },
+
     // 获取列表信息
     getList() {
       this.tableDataLoading = true

@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * Role Enum
  *
- * @author Myles Yang
+ * @author SWU
  */
 public enum RoleEnum {
 

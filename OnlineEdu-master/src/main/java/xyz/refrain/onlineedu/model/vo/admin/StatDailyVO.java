@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * 每日数据统计信息
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Accessors(chain = true)
 @Data

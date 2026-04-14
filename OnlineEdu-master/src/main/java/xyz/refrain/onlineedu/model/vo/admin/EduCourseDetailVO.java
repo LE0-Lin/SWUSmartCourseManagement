@@ -12,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 /**
  * 课程 VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

@@ -33,6 +33,16 @@
                 个人中心
               </el-dropdown-item>
             </router-link>
+            <router-link :to="{name: 'Schedule'}">
+              <el-dropdown-item icon="el-icon-date">
+                我的课表
+              </el-dropdown-item>
+            </router-link>
+            <router-link :to="{name: 'Transcript'}">
+              <el-dropdown-item icon="el-icon-notebook-2">
+                我的成绩单
+              </el-dropdown-item>
+            </router-link>
             <el-dropdown-item divided icon="el-icon-switch-button" @click.native="logout">
               退出登录
             </el-dropdown-item>

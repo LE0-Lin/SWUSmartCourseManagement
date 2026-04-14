@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 /**
  * 讲师的统计字段
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Accessors(chain = true)
 @Data

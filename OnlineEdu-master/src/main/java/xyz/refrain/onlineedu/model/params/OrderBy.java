@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 排序参数
  *
- * @author Myles Yang
+ * @author SWU
  */
 @SuppressWarnings("unchecked")
 public class OrderBy<R> {

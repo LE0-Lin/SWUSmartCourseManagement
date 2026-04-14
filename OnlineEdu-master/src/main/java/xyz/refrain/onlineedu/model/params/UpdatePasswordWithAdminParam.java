@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Update Password With Admin Param
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Data
 @ApiModel("管理员权限更新密码参数")

@@ -1,4 +1,4 @@
-import Vue from 'vue'
+﻿import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
@@ -8,7 +8,7 @@ import Layout from '@/layout'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
- * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
+ * Detail see: https://SWU.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
  *
  * hidden: true                   if set true, item will not show in the sidebar(default is false)
  * alwaysShow: true               if set true, will always show the root menu
@@ -100,6 +100,12 @@ export const constantRoutes = [
         meta: { title: '课程列表', icon: 'list' }
       },
       {
+        path: 'add',
+        name: 'CourseAdd',
+        component: () => import('@/views/edu_course/educourse_add'),
+        meta: { title: '添加课程', icon: 'add' }
+      },
+      {
         path: 'audit',
         name: 'CourseAudit',
         component: () => import('@/views/edu_course/educourse_audit'),
@@ -110,6 +116,22 @@ export const constantRoutes = [
         name: 'CourseSubject',
         component: () => import('@/views/edu_subject/edusubject_list'),
         meta: { title: '分类管理', icon: 'category' }
+      }
+    ]
+  },
+  // 排课管理
+  {
+    path: '/schedule',
+    component: Layout,
+    redirect: '/schedule/list',
+    name: 'Schedule',
+    meta: { title: '排课管理', icon: 'el-icon-s-grid' },
+    children: [
+      {
+        path: 'list',
+        name: 'ScheduleList',
+        component: () => import('@/views/edu_schedule/eduschedule_list'),
+        meta: { title: '智能排课', icon: 'el-icon-magic-stick' }
       }
     ]
   },
@@ -170,19 +192,19 @@ export const constantRoutes = [
       }
     ]
   },
-  // 订单管理
+  // 选课管理
   {
-    path: '/order',
+    path: '/course/select',
     component: Layout,
     hidden: true,
-    name: 'Order',
-    meta: { title: '订单管理', icon: 'el-icon-s-order' },
+    name: 'CourseSelect',
+    meta: { title: '选课管理', icon: 'el-icon-s-order' },
     children: [
       {
         path: 'list',
-        name: 'orderList',
-        component: () => import('@/views/t_order/torder_list'),
-        meta: { title: '订单管理', icon: 'el-icon-s-order' }
+        name: 'CourseSelectList',
+        component: () => import('@/views/edu_course/educourse_list'),
+        meta: { title: '选课管理', icon: 'el-icon-s-order' }
       }
     ]
   }

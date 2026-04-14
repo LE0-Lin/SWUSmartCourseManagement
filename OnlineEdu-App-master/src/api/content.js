@@ -143,3 +143,21 @@ export function orderPaySucceed(orderNo) {
     method: 'post'
   })
 }
+
+// 选课相关API
+
+// 选择课程
+export function selectCourse(courseId) {
+  return request({
+    url: `${api_prefix}/course/select/${courseId}`,
+    method: 'post'
+  })
+}
+
+// 判断学员是否已经选择课程
+export function getIsSelectCourse(courseId) {
+  return request({
+    url: `${api_prefix}/course/isselect/${courseId}`,
+    method: 'get'
+  })
+}

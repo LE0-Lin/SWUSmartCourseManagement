@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * 成绩 服务
  *
- * @author Gemini CLI
+ * @author SWU
  */
 @Service
 @Slf4j

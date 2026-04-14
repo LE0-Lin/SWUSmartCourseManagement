@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 统计缓存key前缀
  *
- * @author Myles Yang
+ * @author SWU
  */
 public interface StatConstant {
 

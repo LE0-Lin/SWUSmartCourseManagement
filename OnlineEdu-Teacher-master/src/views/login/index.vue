@@ -118,7 +118,33 @@ export default {
           // 绕过验证码直接登录
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
-              this.$router.push({ path: this.redirect || '/' })
+              // 根据用户角色自动跳转到不同界面
+              const userRole = this.$store.getters.user.roleId
+              let targetPath = '/'
+              
+              // 角色1: 管理员 -> 管理后台首页
+              // 角色2: 教师 -> 教师端首页
+              // 角色3: 学生 -> 学生端首页
+              switch (userRole) {
+                case '1':
+                case 1:
+                  // 管理员跳转到管理后台
+                  window.location.href = '/admin/'
+                  return
+                case '2':
+                case 2:
+                  targetPath = '/'
+                  break
+                case '3':
+                case 3:
+                  // 学生跳转到学生端
+                  window.location.href = '/app/'
+                  return
+                default:
+                  targetPath = this.redirect || '/'
+              }
+              
+              this.$router.push({ path: targetPath })
               this.loading = false
             }).catch(() => {
               this.loading = false

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 /**
  * Uctr Member Search Param
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

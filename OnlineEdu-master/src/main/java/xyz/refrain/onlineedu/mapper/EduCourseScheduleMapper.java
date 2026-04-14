@@ -9,7 +9,7 @@ import xyz.refrain.onlineedu.model.entity.EduCourseScheduleEntity;
  * 课程表安排 Mapper 接口
  * </p>
  *
- * @author Gemini CLI
+ * @author SWU
  * @since 2026-04-07
  */
 @Mapper

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * 章节 service（讲师二次修改课程章节）
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

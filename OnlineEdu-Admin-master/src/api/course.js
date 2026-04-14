@@ -82,3 +82,31 @@ export function uploadPic(data) {
     data
   })
 }
+
+// 创建课程（讲师端接口）
+const teacher_api_prefix = '/api/teacher/course'
+
+export function createIt(data) {
+  return request({
+    url: `${teacher_api_prefix}/create`,
+    method: 'post',
+    headers: { 'Content-Type': 'multipart/form-data' },
+    data
+  })
+}
+
+// 获取草稿箱课程
+export function getDraft() {
+  return request({
+    url: `${teacher_api_prefix}/draft`,
+    method: 'get'
+  })
+}
+
+// 提交审核
+export function submitIt(id) {
+  return request({
+    url: `${teacher_api_prefix}/submit/${id}`,
+    method: 'post'
+  })
+}

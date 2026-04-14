@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 讲师端数据统计控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherStatController")

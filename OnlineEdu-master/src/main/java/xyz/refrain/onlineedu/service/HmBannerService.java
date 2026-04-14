@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * 首页 banner 服务
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * 首页banner表
  * </p>
  *
- * @author Myles Yang
+ * @author SWU
  * @since 2021-01-16
  */
 @Data

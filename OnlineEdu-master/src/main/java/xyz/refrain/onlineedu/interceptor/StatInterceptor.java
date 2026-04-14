@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 数据统计拦截器
  *
- * @author Myles Yang
+ * @author SWU
  */
 public class StatInterceptor extends AbstractSecurityInterceptor implements HandlerInterceptor {
 

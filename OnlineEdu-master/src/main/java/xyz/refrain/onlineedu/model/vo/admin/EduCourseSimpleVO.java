@@ -18,7 +18,7 @@ import java.io.Serializable;
 /**
  * 课程 VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

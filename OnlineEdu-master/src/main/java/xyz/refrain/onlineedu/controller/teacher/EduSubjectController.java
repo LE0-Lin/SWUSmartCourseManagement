@@ -13,7 +13,7 @@ import xyz.refrain.onlineedu.service.EduSubjectService;
 /**
  * 讲师端分类控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduSubjectController")

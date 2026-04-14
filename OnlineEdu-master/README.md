@@ -1,4 +1,4 @@
-<br>
+﻿<br>
 <font color="#409EFF" size="6">基于SpringBoot+Vue前后端分离的在线教育平台项目</font>
 <br><br>
 
@@ -96,7 +96,7 @@
 
 - Vue.js2 全家桶
 - Element-UI
-- [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template) 后台模板
+- [vue-admin-template](https://github.com/LinZhibo/vue-admin-template) 后台模板
 - axios
 - 图表：v-charts（ECharts）
 - 富文本编辑器：[wangEditor](https://github.com/wangeditor-team/wangEditor/)

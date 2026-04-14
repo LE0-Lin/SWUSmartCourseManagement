@@ -15,7 +15,7 @@ import java.util.UUID;
 /**
  * 本地文件存储服务 (替代 Aliyun Oss)
  *
- * @author Gemini CLI
+ * @author SWU
  */
 @Service
 @Slf4j

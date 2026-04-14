@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 /**
  * 视频 service
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

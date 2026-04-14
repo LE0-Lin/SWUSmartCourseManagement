@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * 首页 banner vo
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

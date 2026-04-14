@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * 讲师端成绩控制器
  *
- * @author Gemini CLI
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduGradeController")

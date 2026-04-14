@@ -8,7 +8,7 @@ import xyz.refrain.onlineedu.model.entity.SysMessageEntity;
  * 消息表 Mapper 接口
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-12
  */
 public interface SysMessageMapper extends BaseMapper<SysMessageEntity> {

@@ -13,6 +13,12 @@ export default new Router({
       hidden: true
     },
     {
+      path: '/login',
+      component: () => import('@/views/login/index'),
+      meta: { index: 0, title: '登录' },
+      hidden: true
+    },
+    {
       path: '/refresh',
       name: 'Refresh',
       component: () => import('@/components/common/refresh'),
@@ -79,6 +85,20 @@ export default new Router({
           name: 'Profile',
           meta: { title: '个人中心' },
           component: () => import('@/views/profile/index')
+        },
+        // 我的课表
+        {
+          path: '/user/schedule',
+          name: 'Schedule',
+          meta: { title: '我的课表' },
+          component: () => import('@/views/schedule/index')
+        },
+        // 我的成绩单
+        {
+          path: '/user/transcript',
+          name: 'Transcript',
+          meta: { title: '我的成绩单' },
+          component: () => import('@/views/grade/transcript')
         },
         // 订阅订单 (hidden)
         /*{

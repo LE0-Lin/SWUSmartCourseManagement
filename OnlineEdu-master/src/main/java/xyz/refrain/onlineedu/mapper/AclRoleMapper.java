@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  *  角色 Mapper 接口
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-02
  */
 public interface AclRoleMapper extends BaseMapper<AclRoleEntity> {

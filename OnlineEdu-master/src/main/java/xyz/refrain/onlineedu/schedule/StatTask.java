@@ -10,7 +10,7 @@ import xyz.refrain.onlineedu.service.StatService;
 /**
  * 数据统计定时任务
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Component
 @Slf4j

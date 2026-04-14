@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * 课程章节临时表（用于存放二次修改的数据）
  * </p>
  *
- * @author snwjas
+ * @author SWU
  * @since 2021-05-24
  */
 @Data

@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * 消息角色表
  *
- * @author Myles Yang
+ * @author SWU
  */
 public enum MessageRoleEnum {
 

@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * 支付类
  *
- * @author Myles Yang
+ * @author SWU
  */
 public enum PayTypeEnum {
 

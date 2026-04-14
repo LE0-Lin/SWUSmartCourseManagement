@@ -48,7 +48,7 @@ export default {
       const file = data.file
       updateAvatar(jsonObj2FormData({ file: file })).then(resp => {
         if (resp.status === 200) {
-          this.$message.success(resp.message)
+          this.$message.success('头像已上传成功，请刷新后查看')
           const user = this.user
           user.avatar = resp.data
           this.$store.dispatch('user/setInfo', user)

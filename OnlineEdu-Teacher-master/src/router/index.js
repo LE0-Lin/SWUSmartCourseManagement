@@ -1,4 +1,4 @@
-import Vue from 'vue'
+﻿import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
@@ -8,7 +8,7 @@ import Layout from '@/layout'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
- * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
+ * Detail see: https://SWU.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
  *
  * hidden: true                   if set true, item will not show in the sidebar(default is false)
  * alwaysShow: true               if set true, will always show the root menu
@@ -130,7 +130,7 @@ export const constantRoutes = [
       meta: { title: '成绩管理', icon: 'el-icon-s-marketing' }
     }]
   },
-  // 课表管理
+  // 我的课表
   {
     path: '/schedule',
     component: Layout,
@@ -138,7 +138,7 @@ export const constantRoutes = [
       path: 'index',
       name: 'ScheduleIndex',
       component: () => import('@/views/schedule/index'),
-      meta: { title: '课表管理', icon: 'el-icon-date' }
+      meta: { title: '我的课表', icon: 'el-icon-s-grid' }
     }]
   },
   // 更新课程信息

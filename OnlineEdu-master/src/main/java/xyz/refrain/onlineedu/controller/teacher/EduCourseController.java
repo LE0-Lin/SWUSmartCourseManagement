@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * 讲师端课程控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduCourseController")

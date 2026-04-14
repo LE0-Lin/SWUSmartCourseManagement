@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * Edu Teacher Service
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j
@@ -111,10 +111,15 @@ public class EduTeacherService {
 	 * 登录
 	 */
 	public R login(LoginParam param) {
+		String username = param.getUsername().trim();
+		String password = param.getPassword().trim();
+
+		// 1. 查找用户
 		EduTeacherEntity entity = eduTeacherMapper.selectOne(
 				Wrappers.lambdaQuery(EduTeacherEntity.class)
-						.eq(EduTeacherEntity::getMobile, param.getUsername())
+						.eq(EduTeacherEntity::getMobile, username)
 		);
+
 		// 用户不存在
 		if (Objects.isNull(entity)) {
 			return RUtils.fail(RS.USERNAME_ERROR);
@@ -126,8 +131,9 @@ public class EduTeacherService {
 		if (!TeacherStatusEnum.PASS.equals(entity.getStatus())) {
 			return RUtils.fail("账户正在审核中");
 		}
-		// 密码错误
-		String encodedPassword = SessionUtils.encodePassword(param.getPassword());
+
+		// 密码校验
+		String encodedPassword = SessionUtils.encodePassword(password);
 		if (!encodedPassword.equals(entity.getPassword())) {
 			return RUtils.fail(RS.PASSWORD_ERROR);
 		}

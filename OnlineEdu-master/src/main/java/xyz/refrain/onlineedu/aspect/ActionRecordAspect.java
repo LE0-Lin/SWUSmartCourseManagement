@@ -20,7 +20,7 @@ import java.util.Objects;
 /**
  * 操作记录注解切面
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Component
 @Aspect

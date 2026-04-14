@@ -3,7 +3,7 @@ package xyz.refrain.onlineedu.constant;
 /**
  * Redis key 前缀 常量
  *
- * @author Myles Yang
+ * @author SWU
  */
 public interface CacheKeyPrefix {
 

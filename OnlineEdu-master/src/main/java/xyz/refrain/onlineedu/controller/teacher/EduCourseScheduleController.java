@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * 讲师端课表控制器
  *
- * @author Gemini CLI
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduCourseScheduleController")

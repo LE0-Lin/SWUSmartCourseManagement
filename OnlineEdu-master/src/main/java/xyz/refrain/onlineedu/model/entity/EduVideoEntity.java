@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * 课程视频
  * </p>
  *
- * @author Myles Yang
+ * @author SWU
  * @since 2021-01-16
  */
 @Data

@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * Sex Enum
  *
- * @author Myles Yang
+ * @author SWU
  */
 public enum SexEnum {
 

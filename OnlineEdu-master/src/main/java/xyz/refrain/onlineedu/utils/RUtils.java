@@ -7,7 +7,7 @@ import xyz.refrain.onlineedu.model.vo.R;
 /**
  * 统一 响应 工具
  *
- * @author Myles Yang
+ * @author SWU
  */
 public class RUtils {
 

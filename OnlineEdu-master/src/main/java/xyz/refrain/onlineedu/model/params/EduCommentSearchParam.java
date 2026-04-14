@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 /**
  * 评论搜索参数
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

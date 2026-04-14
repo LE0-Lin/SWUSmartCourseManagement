@@ -9,7 +9,7 @@ import xyz.refrain.onlineedu.model.entity.EduCourseEntity;
  * 课程 Mapper 接口
  * </p>
  *
- * @author Myles Yang
+ * @author SWU
  * @since 2021-01-16
  */
 public interface EduCourseMapper extends BaseMapper<EduCourseEntity> {

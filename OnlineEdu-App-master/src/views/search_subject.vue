@@ -25,11 +25,15 @@
 
 <script>
 import { getCourses, getSubjectParent } from '@/api/content'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'SearchSubject',
   components: {
     'v-course-list': () => import('@/components/common/course_list')
+  },
+  computed: {
+    ...mapGetters(['user'])
   },
   data() {
     return {
@@ -40,7 +44,8 @@ export default {
       },
       total: 0,
       courseList: [],
-      subjectParent: []
+      subjectParent: [],
+      currentSemester: ''
     }
   },
   watch: {
@@ -53,16 +58,36 @@ export default {
     }
   },
   created() {
+    this.getCurrentSemester()
     const subjectId = this.$route.params.subject
     this.searchParams.subjectId = subjectId
     this.getSubjectParent(subjectId)
     this.getList()
   },
   methods: {
+    getCurrentSemester() {
+      const now = new Date()
+      const month = now.getMonth() + 1
+      this.currentSemester = (month >= 2 && month <= 7) ? 'autumn' : 'spring'
+    },
     getList() {
       getCourses(this.searchParams).then(resp => {
-        this.courseList = resp.data.list
-        this.total = resp.data.total
+        this.courseList = resp.data.list.filter(course => {
+          // 首先过滤当前学期的课程
+          if (course.semester !== this.currentSemester) {
+            return false
+          }
+          // 公共课对所有学生可见
+          if (course.courseType === 'public') {
+            return true
+          }
+          // 专业课需要检查专业限制
+          if (course.courseType === 'major' && course.majors && course.majors.length > 0) {
+            return this.user && this.user.major && course.majors.includes(this.user.major)
+          }
+          return false
+        })
+        this.total = this.courseList.length
       })
     },
     getSubjectParent(id) {

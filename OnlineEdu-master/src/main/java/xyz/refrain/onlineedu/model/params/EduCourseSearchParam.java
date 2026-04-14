@@ -11,7 +11,7 @@ import xyz.refrain.onlineedu.model.enums.CourseStatusEnum;
 /**
  * 课程搜索参数
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

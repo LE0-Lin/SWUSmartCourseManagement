@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * 后台课程控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminEduCourseController")

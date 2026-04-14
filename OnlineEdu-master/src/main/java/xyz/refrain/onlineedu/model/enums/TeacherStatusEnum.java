@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * 讲师状态
  *
- * @author Myles Yang
+ * @author SWU
  */
 public enum TeacherStatusEnum {
 

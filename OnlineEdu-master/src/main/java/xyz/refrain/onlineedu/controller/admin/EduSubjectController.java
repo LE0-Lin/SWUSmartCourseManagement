@@ -17,7 +17,7 @@ import javax.validation.constraints.Min;
 /**
  * 课程科目(分类)控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminEduSubjectController")

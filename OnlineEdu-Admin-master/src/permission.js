@@ -19,8 +19,26 @@ router.beforeEach(async(to, from, next) => {
   const isLogin = Object.keys(store.getters.user).length !== 0
   if (isLogin) {
     if (to.path === '/login') {
-      // if is logged in, redirect to the home page
-      next({ path: '/' })
+      // if is logged in, redirect based on role
+      const userRole = store.getters.user.roleId
+      let targetPath = '/'
+
+      switch (userRole) {
+        case '1':
+        case 1:
+          targetPath = '/'
+          break
+        case '2':
+        case 2:
+          window.location.href = '/teacher/'
+          return
+        case '3':
+        case 3:
+          window.location.href = '/app/'
+          return
+      }
+
+      next({ path: targetPath })
       NProgress.done()
     } else {
       // 生成可访问的路由表
@@ -68,6 +86,4 @@ function generateRoutes() {
     router.options.routes = store.getters.routers
     router.addRoutes([...store.getters.addRouters])
   })
-  // hack方法 确保addRoutes已完成 ,set the replace: true so the navigation will not leave a history record
-  // next({ ...to, replace: true })
 }

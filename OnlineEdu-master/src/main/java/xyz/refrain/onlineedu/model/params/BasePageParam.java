@@ -11,7 +11,7 @@ import javax.validation.constraints.Min;
 /**
  * Base Page Param
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Data
 @Accessors(chain = true)

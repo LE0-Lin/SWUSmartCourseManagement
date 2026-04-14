@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 讲师端章节控制器（用于讲师二次修改课程）
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduChapterTmpController")

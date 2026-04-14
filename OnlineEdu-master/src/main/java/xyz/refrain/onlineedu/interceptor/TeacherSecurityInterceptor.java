@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 讲师端登录安全拦截器
  *
- * @author Myles Yang
+ * @author SWU
  */
 public class TeacherSecurityInterceptor extends AbstractSecurityInterceptor implements HandlerInterceptor {
 

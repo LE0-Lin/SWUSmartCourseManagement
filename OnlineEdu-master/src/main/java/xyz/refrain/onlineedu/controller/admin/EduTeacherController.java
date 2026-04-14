@@ -23,7 +23,7 @@ import java.util.Objects;
 /**
  * 后台讲师控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminEduTeacherController")

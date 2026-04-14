@@ -17,7 +17,7 @@ import javax.validation.constraints.Min;
 /**
  * 讲师端评论控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduCommentController")

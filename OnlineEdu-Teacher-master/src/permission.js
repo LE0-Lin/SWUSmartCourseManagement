@@ -19,8 +19,26 @@ router.beforeEach(async(to, from, next) => {
   const isLogin = Object.keys(store.getters.user).length !== 0
   if (isLogin) {
     if (to.path === '/login') {
-      // if is logged in, redirect to the home page
-      next({ path: '/' })
+      // if is logged in, redirect based on role
+      const userRole = store.getters.user.roleId
+      let targetPath = '/'
+      
+      switch (userRole) {
+        case '1':
+        case 1:
+          window.location.href = '/admin/'
+          return
+        case '2':
+        case 2:
+          targetPath = '/'
+          break
+        case '3':
+        case 3:
+          window.location.href = '/app/'
+          return
+      }
+      
+      next({ path: targetPath })
       NProgress.done()
     } else {
       next()

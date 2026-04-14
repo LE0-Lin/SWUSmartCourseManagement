@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 /**
  * 课程分类搜索参数
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

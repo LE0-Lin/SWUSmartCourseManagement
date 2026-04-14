@@ -9,7 +9,7 @@ import xyz.refrain.onlineedu.model.entity.EduGradeEntity;
  * 学生成绩 Mapper 接口
  * </p>
  *
- * @author Gemini CLI
+ * @author SWU
  * @since 2026-04-07
  */
 @Mapper

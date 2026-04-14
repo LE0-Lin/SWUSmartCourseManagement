@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 讲师端视频控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("TeacherEduVideoController")

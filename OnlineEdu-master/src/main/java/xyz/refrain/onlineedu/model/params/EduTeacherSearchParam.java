@@ -10,7 +10,7 @@ import xyz.refrain.onlineedu.model.enums.TeacherStatusEnum;
 /**
  * Edu Teacher Search Param
  *
- * @author Myles Yang
+ * @author SWU
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

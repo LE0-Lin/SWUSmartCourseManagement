@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 /**
  * 数据统计控制器
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Validated
 @RestController("AdminStatController")

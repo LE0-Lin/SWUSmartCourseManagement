@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * 用于安全验证的保存的用户信息（session）
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * Edu Teacher Service
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j
@@ -87,10 +87,15 @@ public class UctrMemberService {
 	 * 登录
 	 */
 	public R login(LoginParam param) {
+		String username = param.getUsername().trim();
+		String password = param.getPassword().trim();
+
+		// 1. 查找用户
 		UctrMemberEntity entity = uctrMemberMapper.selectOne(
 				Wrappers.lambdaQuery(UctrMemberEntity.class)
-						.eq(UctrMemberEntity::getMobile, param.getUsername())
+						.eq(UctrMemberEntity::getMobile, username)
 		);
+
 		// 用户不存在
 		if (Objects.isNull(entity)) {
 			return RUtils.fail(RS.USERNAME_ERROR);
@@ -100,7 +105,7 @@ public class UctrMemberService {
 			return RUtils.fail(RS.ACCOUNT_DISABLED);
 		}
 		// 密码错误
-		String encodedPassword = SessionUtils.encodePassword(param.getPassword());
+		String encodedPassword = SessionUtils.encodePassword(password);
 		if (!encodedPassword.equals(entity.getPassword())) {
 			return RUtils.fail(RS.PASSWORD_ERROR);
 		}

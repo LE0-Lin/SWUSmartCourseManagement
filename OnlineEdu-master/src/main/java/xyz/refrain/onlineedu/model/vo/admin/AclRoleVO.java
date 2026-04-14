@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * Acl Role VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ApiModel("角色视图对象")
 @ToString(callSuper = true)

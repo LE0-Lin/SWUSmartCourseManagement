@@ -19,7 +19,7 @@ import java.time.temporal.Temporal;
 /**
  * Swagger 配置
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Configuration
 @EnableSwagger2

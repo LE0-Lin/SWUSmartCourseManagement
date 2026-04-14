@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * 课表安排 服务
  *
- * @author Gemini CLI
+ * @author SWU
  */
 @Service
 @Slf4j

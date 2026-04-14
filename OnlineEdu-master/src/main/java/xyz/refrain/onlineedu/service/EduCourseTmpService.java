@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * 课程 服务(为讲师二次修改课程服务)
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

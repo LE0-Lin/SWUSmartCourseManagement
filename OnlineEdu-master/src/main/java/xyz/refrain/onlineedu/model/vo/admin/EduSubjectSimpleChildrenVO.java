@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 课程科目(分类) vo
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * 数据统计业务类
  *
- * @author Myles Yang
+ * @author SWU
  */
 @Service
 @Slf4j

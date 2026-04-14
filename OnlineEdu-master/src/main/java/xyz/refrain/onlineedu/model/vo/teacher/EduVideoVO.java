@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * 视频 VO
  *
- * @author Myles Yang
+ * @author SWU
  */
 @ToString(callSuper = true)
 @Accessors(chain = true)
