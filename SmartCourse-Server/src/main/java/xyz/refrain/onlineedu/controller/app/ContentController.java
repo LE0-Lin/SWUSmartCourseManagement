@@ -161,7 +161,7 @@ public class ContentController {
 		return eduGradeService.getStudentGrade(courseId, member.getId());
 	}
 
-	@GetMapping("/get/grade/transcript")
+	@GetMapping("/get/transcript")
 	@ApiOperation("获取学生成绩单")
 	public R getTranscript(HttpServletRequest request) {
 		UctrMemberDetail member = SessionUtils.getMember(request);
@@ -177,7 +177,7 @@ public class ContentController {
 		return eduCourseScheduleService.getScheduleByCourseId(courseId);
 	}
 
-	@GetMapping("/get/schedule/my")
+	@GetMapping("/get/schedule/me")
 	@ApiOperation("获取当前学生的课表")
 	public R getMySchedule(HttpServletRequest request) {
 		UctrMemberDetail member = SessionUtils.getMember(request);

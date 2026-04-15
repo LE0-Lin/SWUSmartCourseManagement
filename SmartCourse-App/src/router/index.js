@@ -15,7 +15,7 @@ export default new Router({
     {
       path: '/login',
       component: () => import('@/views/login/index'),
-      meta: { index: 0, title: '登录' },
+      meta: { index: 0, title: 'Login' },
       hidden: true
     },
     {
@@ -25,7 +25,6 @@ export default new Router({
       meta: { title: 'refresh' },
       hidden: true
     },
-    // 首页
     {
       path: '/',
       component: Layout,
@@ -33,104 +32,66 @@ export default new Router({
         {
           path: '',
           name: 'Index',
-          meta: { title: '首页' },
+          meta: { title: 'Home' },
           component: () => import('@/views/Index')
         }
       ]
     },
-    // 课程相关
     {
       path: '/course',
       component: Layout,
       children: [
-        // 课程详情页面
         {
           path: '/course/detail/:id',
           name: 'Course',
-          meta: { title: '课程' },
+          meta: { title: 'Course' },
           component: () => import('@/views/course')
         },
-        // 根据关键字搜索课程
         {
           path: '/course/s/:title',
           name: 'SearchByKeyword',
-          meta: { title: '搜索' },
+          meta: { title: 'Search' },
           component: () => import('@/views/search_keyword')
         },
-        // 根据分类搜索课程
         {
           path: '/course/sub/:subject',
           name: 'SearchBySubject',
-          meta: { title: '分类' },
+          meta: { title: 'Category' },
           component: () => import('@/views/search_subject')
         },
-        // 根据讲师搜索课程
         {
           path: '/course/tch/:teacher',
           name: 'SearchByTeacher',
-          meta: { title: '讲师' },
+          meta: { title: 'Teacher' },
           component: () => import('@/views/search_teacher')
         }
       ]
     },
-    // 用户中心
     {
       path: '/user',
       component: Layout,
       redirect: '/user/profile',
       children: [
-        // 个人中心
         {
           path: '/user/profile',
           name: 'Profile',
-          meta: { title: '个人中心' },
+          meta: { title: 'Profile' },
           component: () => import('@/views/profile/index')
         },
-        // 我的课表
         {
           path: '/user/schedule',
           name: 'Schedule',
-          meta: { title: '我的课表' },
+          meta: { title: 'Schedule' },
           component: () => import('@/views/schedule/index')
         },
-        // 我的成绩单
         {
           path: '/user/transcript',
           name: 'Transcript',
-          meta: { title: '我的成绩单' },
+          meta: { title: 'Transcript' },
           component: () => import('@/views/grade/transcript')
-        },
-        // 订阅订单 (hidden)
-        /*{
-          path: '/user/order',
-          name: 'Order',
-          meta: { title: '订阅订单' },
-          component: () => import('@/views/order')
-        }*/      ]
-    },
-    /*{
-      path: '/recruit',
-      component: Layout,
-      redirect: '/recruit/claim',
-      children: [
-        // 招聘要求
-        {
-          path: '/recruit/claim',
-          name: 'Recruit',
-          meta: { title: '讲师入驻' },
-          component: () => import('@/views/recruit/recruit_reqm')
-        },
-        // 入驻申请
-        {
-          path: '/recruit/apply',
-          name: 'Apply',
-          meta: { title: '讲师入驻' },
-          component: () => import('@/views/recruit/apply')
         }
       ]
-    },*/
-
-    // 404 page must be placed at the end !!!
+    },
     { path: '*', redirect: '/404', hidden: true }
   ]
 })

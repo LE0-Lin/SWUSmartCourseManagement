@@ -94,7 +94,7 @@ export function getCourseGrade(courseId) {
 
 export function getTranscript() {
   return request({
-    url: `${api_prefix}/get/grade/transcript`,
+    url: `${api_prefix}/get/transcript`,
     method: 'get'
   })
 }
@@ -109,7 +109,7 @@ export function getCourseSchedule(courseId) {
 
 export function getMySchedule() {
   return request({
-    url: `${api_prefix}/get/schedule/my`,
+    url: `${api_prefix}/get/schedule/me`,
     method: 'get'
   })
 }
