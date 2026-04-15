@@ -1,4 +1,3 @@
-<!-- 步骤1 ： 创建课程基本信息 -->
 <template>
   <div>
     <el-form :model="data" size="small" label-width="100px">
@@ -19,11 +18,13 @@
           </el-tooltip>
         </el-upload>
       </el-form-item>
+
       <el-form-item label="课程名称：" prop="title">
         <el-input v-model="data.title" placeholder="请输入课程名称" />
       </el-form-item>
+
       <el-form :model="data" :inline="true" size="small" label-width="100px">
-        <el-form-item label="学　　分：" prop="credit">
+        <el-form-item label="学分：" prop="credit">
           <el-input-number v-model="data.credit" :min="0" :max="10" :step="0.5" style="width: 200px" />
         </el-form-item>
         <el-form-item label="课程分类：" prop="subjectId">
@@ -39,7 +40,7 @@
           />
         </el-form-item>
       </el-form>
-      
+
       <el-form :model="data" size="small" label-width="100px">
         <el-form-item label="成绩占比设置：">
           <el-form :model="data.gradeRatio" size="small" label-width="80px">
@@ -62,7 +63,7 @@
           </el-form>
         </el-form-item>
       </el-form>
-      
+
       <el-form :model="data" size="small" label-width="100px">
         <el-form-item label="选课设置：">
           <el-form size="small" label-width="120px">
@@ -87,7 +88,7 @@
                 <el-option v-for="major in majorOptions" :key="major.value" :label="major.label" :value="major.value" />
               </el-select>
             </el-form-item>
-            <el-form-item label="适用专业：" prop="majors" v-if="data.courseType === 'major'">
+            <el-form-item v-if="data.courseType === 'major'" label="适用专业：" prop="majors">
               <el-select v-model="data.majors" multiple placeholder="请选择适用专业" style="width: 100%">
                 <el-option v-for="major in majorOptions" :key="major.value" :label="major.label" :value="major.value" />
               </el-select>
@@ -98,30 +99,14 @@
                 <el-option label="下学期" value="autumn" />
               </el-select>
             </el-form-item>
-            <el-form-item label="选课开始时间：" prop="selectStartTime">
-              <el-date-picker
-                v-model="data.selectStartTime"
-                type="datetime"
-                placeholder="选择开始时间"
-                style="width: 100%"
-              />
-            </el-form-item>
-            <el-form-item label="选课结束时间：" prop="selectEndTime">
-              <el-date-picker
-                v-model="data.selectEndTime"
-                type="datetime"
-                placeholder="选择结束时间"
-                style="width: 100%"
-              />
-            </el-form-item>
             <el-form-item label="上课时间设置：" prop="classTimes">
-              <el-button type="primary" size="small" @click="addClassTime" style="margin-bottom: 10px">
-                <i class="el-icon-plus"></i> 添加上课时间
+              <el-button type="primary" size="small" style="margin-bottom: 10px" @click="addClassTime">
+                <i class="el-icon-plus" /> 添加上课时间
               </el-button>
               <div v-for="(time, index) in data.classTimes" :key="index" class="class-time-item">
                 <el-row :gutter="20">
                   <el-col :span="8">
-                    <el-form-item label="星期：" :prop="`classTimes[${index}].weekday`">
+                    <el-form-item :prop="`classTimes[${index}].weekday`" label="星期：">
                       <el-select v-model="time.weekday" placeholder="选择星期" style="width: 100%">
                         <el-option label="周一" value="1" />
                         <el-option label="周二" value="2" />
@@ -134,7 +119,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
-                    <el-form-item label="课时：" :prop="`classTimes[${index}].period`">
+                    <el-form-item :prop="`classTimes[${index}].period`" label="课时：">
                       <el-select v-model="time.period" placeholder="选择课时" style="width: 100%">
                         <el-option label="1-2节 (8:00-9:40)" value="12" />
                         <el-option label="3-4节 (10:00-11:40)" value="34" />
@@ -145,19 +130,23 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="4">
-                    <el-form-item label="开始周：" :prop="`classTimes[${index}].startWeek`">
-                      <el-input-number v-model="time.startWeek" :min="1" :max="16" style="width: 100%" />
+                    <el-form-item :prop="`classTimes[${index}].startWeek`" label="开始周：">
+                      <el-select v-model="time.startWeek" placeholder="选择开始周" style="width: 100%">
+                        <el-option v-for="week in weekOptions" :key="`start-${index}-${week}`" :label="`第${week}周`" :value="week" />
+                      </el-select>
                     </el-form-item>
                   </el-col>
                   <el-col :span="4">
-                    <el-form-item label="结束周：" :prop="`classTimes[${index}].endWeek`">
-                      <el-input-number v-model="time.endWeek" :min="1" :max="16" style="width: 100%" />
+                    <el-form-item :prop="`classTimes[${index}].endWeek`" label="结束周：">
+                      <el-select v-model="time.endWeek" placeholder="选择结束周" style="width: 100%">
+                        <el-option v-for="week in weekOptions" :key="`end-${index}-${week}`" :label="`第${week}周`" :value="week" />
+                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row :gutter="20">
                   <el-col :span="8">
-                    <el-form-item label="教学楼：" :prop="`classTimes[${index}].building`">
+                    <el-form-item :prop="`classTimes[${index}].building`" label="教学楼：">
                       <el-select v-model="time.building" placeholder="选择教学楼" style="width: 100%" @change="onBuildingChange(index)">
                         <el-option label="A楼" value="A" />
                         <el-option label="B楼" value="B" />
@@ -168,7 +157,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
-                    <el-form-item label="教室：" :prop="`classTimes[${index}].classroom`">
+                    <el-form-item :prop="`classTimes[${index}].classroom`" label="教室：">
                       <el-select v-model="time.classroom" placeholder="选择教室" style="width: 100%">
                         <el-option v-for="classroom in getClassrooms(time.building)" :key="classroom" :label="classroom" :value="classroom" />
                       </el-select>
@@ -177,7 +166,7 @@
                   <el-col :span="8">
                     <el-form-item label="操作：">
                       <el-button type="danger" size="small" @click="removeClassTime(index)">
-                        <i class="el-icon-delete"></i> 删除
+                        <i class="el-icon-delete" /> 删除
                       </el-button>
                     </el-form-item>
                   </el-col>
@@ -187,7 +176,7 @@
           </el-form>
         </el-form-item>
       </el-form>
-      
+
       <div>
         <p class="into">课程简介：</p>
         <div id="editor" />
@@ -197,7 +186,6 @@
 </template>
 
 <script>
-
 import { uploadPic } from '@/api/course'
 import { getSubject } from '@/api/subject'
 import { encodeOssFileUri, jsonObj2FormData } from '@/utils'
@@ -228,14 +216,10 @@ export default {
         major: '',
         majors: [],
         semester: '',
-        selectStartTime: null,
-        selectEndTime: null,
         classTimes: []
       },
       editor: null,
-      // 分类选项
       subjectOptions: [],
-      // 院系专业关系
       departmentMajorMap: {
         computer: [
           { label: '计算机科学与技术', value: 'computer_science' },
@@ -270,7 +254,8 @@ export default {
           { label: '其他', value: 'other' }
         ]
       },
-      majorOptions: []
+      majorOptions: [],
+      weekOptions: Array.from({ length: 21 }, (_, index) => index + 1)
     }
   },
   created() {
@@ -283,18 +268,21 @@ export default {
     setData(data) {
       this.original = data
       Object.keys(this.data).forEach((key) => {
-          if (key === 'gradeRatio' && this.original[key]) {
-            Object.keys(this.data.gradeRatio).forEach((ratioKey) => {
-              this.data.gradeRatio[ratioKey] = this.original[key][ratioKey] || 0
-            })
-          } else if (key === 'classTimes' && this.original[key]) {
-            this.data.classTimes = this.original[key]
-          } else {
-            this.data[key] = this.original[key]
-          }
-        })
+        if (key === 'gradeRatio' && this.original[key]) {
+          Object.keys(this.data.gradeRatio).forEach((ratioKey) => {
+            this.data.gradeRatio[ratioKey] = this.original[key][ratioKey] || 0
+          })
+        } else if (key === 'classTimes' && this.original[key]) {
+          this.data.classTimes = this.original[key].map(item => ({
+            ...item,
+            startWeek: item.startWeek || 1,
+            endWeek: item.endWeek || 21
+          }))
+        } else {
+          this.data[key] = this.original[key]
+        }
+      })
       this.editor.txt.html(this.data.description)
-      // 根据院系更新专业选项
       if (this.data.department) {
         this.handleDepartmentChange(this.data.department)
       }
@@ -306,7 +294,6 @@ export default {
     encodeOssFileUri(ossUri) {
       return encodeOssFileUri(ossUri)
     },
-    // 选择图片事件
     selectAvatar(file) {
       this.original.cover = URL.createObjectURL(file.raw)
       this.data.file = file.raw
@@ -322,24 +309,21 @@ export default {
         this.data.subjectId = arr[arr.length - 1]
       }
     },
-    // 院系变化时更新专业选项
     handleDepartmentChange(department) {
       this.data.major = ''
       this.data.majors = []
       this.majorOptions = this.departmentMajorMap[department] || []
     },
-    // 添加上课时间
     addClassTime() {
       this.data.classTimes.push({
         weekday: '1',
         period: '12',
         startWeek: 1,
-        endWeek: 16,
+        endWeek: 21,
         building: '',
         classroom: ''
       })
     },
-    // 获取教室列表
     getClassrooms(building) {
       if (!building) return []
       const classrooms = []
@@ -350,29 +334,23 @@ export default {
       }
       return classrooms
     },
-    // 教学楼变化时清空教室
     onBuildingChange(index) {
       this.data.classTimes[index].classroom = ''
     },
-    // 删除上课时间
     removeClassTime(index) {
       this.data.classTimes.splice(index, 1)
     },
-    // 初始化编辑器
     initEditor() {
       const editor = this.editor = new E('#editor')
       editor.config.height = 200
       editor.config.zIndex = 1600
       editor.config.onchange = this.contentChange
-      // 菜单
       editor.config.excludeMenus = ['emoticon', 'video', 'fontName', 'todo', 'code']
-      // 图片
-      editor.config.uploadImgMaxSize = 2 * 1024 * 1024 // 2M
+      editor.config.uploadImgMaxSize = 2 * 1024 * 1024
       editor.config.uploadImgAccept = ['jpg', 'jpeg', 'png']
       editor.config.uploadImgMaxLength = 1
       editor.config.showLinkImg = false
       editor.config.customUploadImg = this.insertPicToEditor
-      // 创建
       editor.create()
     },
     contentChange(html) {
@@ -380,7 +358,7 @@ export default {
     },
     insertPicToEditor(files, insertImgFn) {
       for (const file of files) {
-        uploadPic(jsonObj2FormData({ file: file })).then(resp => {
+        uploadPic(jsonObj2FormData({ file })).then(resp => {
           insertImgFn(resp.data)
         })
       }
@@ -414,4 +392,11 @@ export default {
   color: #606266;
 }
 
+.class-time-item {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+}
 </style>
