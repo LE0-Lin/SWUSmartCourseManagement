@@ -1,9 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
-title OnlineEdu Auto Startup (English Version)
+set "PROJECT_NAME=SmartCourse"
+set "SERVER_DIR=SmartCourse-Server"
+set "APP_DIR=SmartCourse-App"
+set "TEACHER_DIR=SmartCourse-Teacher"
+set "ADMIN_DIR=SmartCourse-Admin"
+title %PROJECT_NAME% Auto Startup (English Version)
 
 echo ==============================================
-echo    OnlineEdu Project Startup Script
+echo    %PROJECT_NAME% Project Startup Script
 echo ==============================================
 echo.
 
@@ -65,7 +70,7 @@ for %%p in (%COMMON_PATHS%) do (
 :: 5. Fallback to Node.js Import (For users lacking mysql.exe in PATH)
 echo  =^> Still cannot find mysql.exe! 
 echo  =^> Using Node.js smart fallback to inject database...
-cd /d "%~dp0OnlineEdu-master"
+cd /d "%~dp0%SERVER_DIR%"
 echo  =^> Installing database driver for Node.js (this only takes a few seconds)...
 call npm install mysql2 --no-save --registry=https://registry.npmmirror.com >nul 2>nul
 
@@ -114,7 +119,7 @@ if %ERRORLEVEL% neq 0 (
     pause
     goto skip_db
 )
-!MYSQL_CMD! -uroot -p%MYSQL_PWD% online_edu < "%~dp0OnlineEdu-master\schema.sql"
+!MYSQL_CMD! -uroot -p%MYSQL_PWD% online_edu < "%~dp0%SERVER_DIR%\schema.sql"
 echo Database initialized successfully.
 
 
@@ -135,14 +140,14 @@ if not defined MYSQL_PWD (
 )
 
 echo [3/6] Starting SpringBoot Backend...
-if exist "%~dp0OnlineEdu-master\target\online-edu-0.0.1-SNAPSHOT.jar" (
-    start "Backend" cmd /k "cd /d %~dp0OnlineEdu-master\target && java -jar online-edu-0.0.1-SNAPSHOT.jar --spring.datasource.password=%MYSQL_PWD%"
+if exist "%~dp0%SERVER_DIR%\target\online-edu-0.0.1-SNAPSHOT.jar" (
+    start "Backend" cmd /k "cd /d %~dp0%SERVER_DIR%\target && java -jar online-edu-0.0.1-SNAPSHOT.jar --spring.datasource.password=%MYSQL_PWD%"
 ) else (
     echo.
     echo ===================================================
     echo [FATAL ERROR] Backend JAR not found!
     echo Please build the backend project first using Maven.
-    echo You are missing \OnlineEdu-master\target\online-edu-0.0.1-SNAPSHOT.jar
+    echo You are missing \%SERVER_DIR%\target\online-edu-0.0.1-SNAPSHOT.jar
     echo ===================================================
     pause
     exit /b
@@ -150,29 +155,29 @@ if exist "%~dp0OnlineEdu-master\target\online-edu-0.0.1-SNAPSHOT.jar" (
 timeout /t 3 >nul
 
 echo [4/6] Starting Vue App Frontend (Student)...
-if not exist "%~dp0OnlineEdu-App-master\node_modules\" (
+if not exist "%~dp0%APP_DIR%\node_modules\" (
     echo Installing dependencies for App...
-    start "App_Frontend" cmd /k "cd /d %~dp0OnlineEdu-App-master && npm install --registry=https://registry.npmmirror.com --legacy-peer-deps && npm run dev"
+    start "App_Frontend" cmd /k "cd /d %~dp0%APP_DIR% && npm install --registry=https://registry.npmmirror.com --legacy-peer-deps && npm run dev"
 ) else (
-    start "App_Frontend" cmd /k "cd /d %~dp0OnlineEdu-App-master && npm run dev"
+    start "App_Frontend" cmd /k "cd /d %~dp0%APP_DIR% && npm run dev"
 )
 timeout /t 1 >nul
 
 echo [5/6] Starting Vue Teacher Frontend...
-if not exist "%~dp0OnlineEdu-Teacher-master\node_modules\" (
+if not exist "%~dp0%TEACHER_DIR%\node_modules\" (
     echo Installing dependencies for Teacher...
-    start "Teacher_Frontend" cmd /k "cd /d %~dp0OnlineEdu-Teacher-master && npm install --registry=https://registry.npmmirror.com --legacy-peer-deps && npm run dev"
+    start "Teacher_Frontend" cmd /k "cd /d %~dp0%TEACHER_DIR% && npm install --registry=https://registry.npmmirror.com --legacy-peer-deps && npm run dev"
 ) else (
-    start "Teacher_Frontend" cmd /k "cd /d %~dp0OnlineEdu-Teacher-master && npm run dev"
+    start "Teacher_Frontend" cmd /k "cd /d %~dp0%TEACHER_DIR% && npm run dev"
 )
 timeout /t 1 >nul
 
 echo [6/6] Starting Vue Admin Frontend...
-if not exist "%~dp0OnlineEdu-Admin-master\node_modules\" (
+if not exist "%~dp0%ADMIN_DIR%\node_modules\" (
     echo Installing dependencies for Admin...
-    start "Admin_Frontend" cmd /k "cd /d %~dp0OnlineEdu-Admin-master && npm install --registry=https://registry.npmmirror.com --legacy-peer-deps && npm run dev"
+    start "Admin_Frontend" cmd /k "cd /d %~dp0%ADMIN_DIR% && npm install --registry=https://registry.npmmirror.com --legacy-peer-deps && npm run dev"
 ) else (
-    start "Admin_Frontend" cmd /k "cd /d %~dp0OnlineEdu-Admin-master && npm run dev"
+    start "Admin_Frontend" cmd /k "cd /d %~dp0%ADMIN_DIR% && npm run dev"
 )
 
 :: Create test webpage
@@ -243,7 +248,7 @@ echo ^<!DOCTYPE html^>
 ^</head^>
 ^<body^>
     ^<div class="container"^>
-        ^<h1^>Online Education System Test^</h1^>
+        ^<h1^>%PROJECT_NAME% System Test^</h1^>
         
         ^<div class="test-section"^>
             ^<h2^>System Status^</h2^>

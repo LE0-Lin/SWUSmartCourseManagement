@@ -1,7 +1,7 @@
 <template>
   <el-row type="flex" justify="center" class="footer">
     <el-col :span="20">
-      <div>Copyright © 2024 西大智能课程管理系统</div>
+      <div>Copyright © 2026 西大智能课程管理系统</div>
       <div style="margin-top:5px;">作者：
         <el-link :underline="false" href="#" target="_blank">
           智能课程管理系统开发小组
