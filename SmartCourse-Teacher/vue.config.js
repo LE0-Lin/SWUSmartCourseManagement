@@ -37,7 +37,7 @@ module.exports = {
       errors: true
     },
     proxy: {
-      '/api/pub': {
+      '/api': {
         target: 'http://localhost:9096',
         changeOrigin: true
       }

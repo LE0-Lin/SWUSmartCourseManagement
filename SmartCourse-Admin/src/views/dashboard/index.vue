@@ -2,7 +2,6 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="12" :sm="8">
-        <!-- 管理员 -->
         <el-col :xs="12" :sm="24" style="padding:0">
           <el-card class="box-card">
             <div slot="header" class="clearfix">
@@ -20,7 +19,6 @@
             </div>
           </el-card>
         </el-col>
-        <!-- 讲师 -->
         <el-col :xs="12" :sm="24" style="padding:0">
           <el-card class="box-card">
             <div slot="header" class="clearfix">
@@ -38,22 +36,7 @@
             </div>
           </el-card>
         </el-col>
-        <!-- 视频 -->
-        <el-col :xs="12" :sm="24" style="padding:0">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="cardName">视频数量</span>
-            </div>
-            <div class="cardContent clearfix">
-              <el-tooltip effect="dark" placement="top">
-                <div slot="content">课程视频总数量为：{{ stat.videoCount }}</div>
-                <span>{{ stat.videoCount }}</span>
-              </el-tooltip>
-            </div>
-          </el-card>
-        </el-col>
       </el-col>
-      <!-- 学员 -->
       <el-col :xs="12" :sm="8">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
@@ -71,7 +54,6 @@
           </div>
         </el-card>
       </el-col>
-      <!-- 课程 -->
       <el-col :xs="12" :sm="8">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
@@ -83,7 +65,7 @@
               <span>{{ stat.courseCount }}</span>
             </el-tooltip>
             <el-tooltip effect="dark" placement="top">
-              <div slot="content">{{ stat.disabledCourseCount }} 门课程已被下架</div>
+              <div slot="content">{{ stat.disabledCourseCount }} 门课程已下架</div>
               <span style="float: right;color: #F44336">{{ stat.disabledCourseCount }}</span>
             </el-tooltip>
           </div>
@@ -94,7 +76,6 @@
 </template>
 
 <script>
-
 import { getCommon } from '@/api/stat'
 
 export default {
@@ -115,7 +96,6 @@ export default {
         editingCourseCount: 0,
         auditingCourseCount: 0,
         rejectedCourseCount: 0,
-        videoCount: 0,
         orderCount: 0,
         orderPayByWechatCount: 0,
         orderPayByAlipayCount: 0,
@@ -130,7 +110,7 @@ export default {
   methods: {
     getCommonStat() {
       getCommon().then(resp => {
-        this.stat = resp.data
+        this.stat = resp.data || {}
       })
     }
   }
