@@ -61,6 +61,12 @@ public class EduCourseScheduleService {
      * 保存或更新安排
      */
     public R saveOrUpdateSchedule(EduCourseScheduleEntity entity) {
+        if (entity.getStartWeek() == null || entity.getStartWeek() < 1) {
+            entity.setStartWeek(1);
+        }
+        if (entity.getEndWeek() == null || entity.getEndWeek() < entity.getStartWeek()) {
+            entity.setEndWeek(21);
+        }
         int i;
         if (entity.getId() != null) {
             i = eduCourseScheduleMapper.updateById(entity);
@@ -147,6 +153,8 @@ public class EduCourseScheduleService {
             row.put("dayOfWeek", item.getDayOfWeek());
             row.put("sectionStart", item.getSectionStart());
             row.put("sectionEnd", item.getSectionEnd());
+            row.put("startWeek", item.getStartWeek());
+            row.put("endWeek", item.getEndWeek());
             row.put("location", item.getLocation());
             return row;
         }).collect(Collectors.toList());

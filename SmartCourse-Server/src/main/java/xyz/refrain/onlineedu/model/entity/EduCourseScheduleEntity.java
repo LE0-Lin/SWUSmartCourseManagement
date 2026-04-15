@@ -47,6 +47,14 @@ public class EduCourseScheduleEntity implements Serializable {
     @TableField("section_end")
     private Integer sectionEnd;
 
+    @ApiModelProperty(value = "开始周(1-21)")
+    @TableField("start_week")
+    private Integer startWeek;
+
+    @ApiModelProperty(value = "结束周(1-21)")
+    @TableField("end_week")
+    private Integer endWeek;
+
     @ApiModelProperty(value = "上课地点")
     @TableField("location")
     private String location;

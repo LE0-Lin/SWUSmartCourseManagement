@@ -4,6 +4,9 @@
       <template slot="header">
         <div class="card-header">
           <span>我的课表</span>
+          <el-select v-model="currentWeek" size="small" style="width: 120px">
+            <el-option v-for="week in weekOptions" :key="week" :label="`第${week}周`" :value="week" />
+          </el-select>
         </div>
       </template>
 
@@ -28,7 +31,8 @@
                 >
                   <div class="course-title">{{ course.title }}</div>
                   <div class="course-info">{{ course.location || '待定' }}</div>
-                  <div class="course-sections">第 {{ course.sectionStart }}-{{ course.sectionEnd }} 节</div>
+                  <div class="course-sections">第{{ course.sectionStart }}-{{ course.sectionEnd }}节</div>
+                  <div class="course-weeks">第{{ course.startWeek || 1 }}-{{ course.endWeek || 21 }}周</div>
                 </div>
               </div>
             </div>
@@ -64,7 +68,9 @@ export default {
         { key: '78', start: 7, end: 8, time: '16:00-17:40' },
         { key: '910', start: 9, end: 10, time: '19:00-20:40' }
       ],
-      courses: []
+      courses: [],
+      currentWeek: 1,
+      weekOptions: Array.from({ length: 21 }, (_, index) => index + 1)
     }
   },
   created() {
@@ -82,7 +88,9 @@ export default {
     getCourses(weekday, period) {
       return this.courses.filter(course => course.dayOfWeek === weekday &&
         course.sectionStart === period.start &&
-        course.sectionEnd === period.end)
+        course.sectionEnd === period.end &&
+        this.currentWeek >= Number(course.startWeek || 1) &&
+        this.currentWeek <= Number(course.endWeek || 21))
     },
     getCourseColor(courseId) {
       const colors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399']
@@ -168,7 +176,8 @@ export default {
   }
 
   .course-info,
-  .course-sections {
+  .course-sections,
+  .course-weeks {
     font-size: 10px;
     line-height: 1.5;
   }

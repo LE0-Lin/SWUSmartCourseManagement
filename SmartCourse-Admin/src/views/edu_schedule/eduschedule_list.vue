@@ -26,12 +26,12 @@
       <el-table v-loading="loading" :data="courseList" stripe style="width: 100%">
         <el-table-column prop="title" label="课程名称" min-width="220" />
         <el-table-column prop="teacherName" label="讲师" width="160" />
-        <el-table-column label="课表" min-width="360">
+        <el-table-column label="课表" min-width="420">
           <template slot-scope="scope">
             <div v-if="scope.row.classTimes.length">
               <div
                 v-for="item in scope.row.classTimes"
-                :key="item.id || `${item.dayOfWeek}-${item.sectionStart}-${item.sectionEnd}-${item.location}`"
+                :key="item.id || `${item.dayOfWeek}-${item.sectionStart}-${item.sectionEnd}-${item.startWeek}-${item.endWeek}`"
                 class="schedule-line"
               >
                 {{ formatSchedule(item) }}
@@ -62,7 +62,7 @@
       </div>
     </el-card>
 
-    <el-dialog title="编辑排课" :visible.sync="scheduleDialogVisible" width="760px">
+    <el-dialog title="编辑排课" :visible.sync="scheduleDialogVisible" width="860px">
       <div class="dialog-header">
         <div class="dialog-course">{{ currentCourse.title || '-' }}</div>
         <div class="dialog-teacher">{{ currentCourse.teacherName || '-' }}</div>
@@ -74,16 +74,28 @@
               <el-option v-for="day in weekdays" :key="day.value" :label="day.label" :value="day.value" />
             </el-select>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-select v-model="item.periodKey" placeholder="节次" style="width: 100%" @change="syncPeriod(item)">
               <el-option v-for="period in periods" :key="period.key" :label="period.label" :value="period.key" />
             </el-select>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="5">
+            <el-select v-model="item.startWeek" placeholder="开始周" style="width: 100%">
+              <el-option v-for="week in weekOptions" :key="`start-${index}-${week}`" :label="`第${week}周`" :value="week" />
+            </el-select>
+          </el-col>
+          <el-col :span="5">
+            <el-select v-model="item.endWeek" placeholder="结束周" style="width: 100%">
+              <el-option v-for="week in weekOptions" :key="`end-${index}-${week}`" :label="`第${week}周`" :value="week" />
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12" style="margin-top: 12px">
+          <el-col :span="20">
             <el-input v-model="item.location" placeholder="上课地点，例如 A101" />
           </el-col>
-          <el-col :span="2">
-            <el-button type="danger" icon="el-icon-delete" @click="removeClassTime(index)" />
+          <el-col :span="4">
+            <el-button type="danger" icon="el-icon-delete" style="width: 100%" @click="removeClassTime(index)">删除</el-button>
           </el-col>
         </el-row>
       </div>
@@ -132,6 +144,7 @@ export default {
         { key: '78', label: '7-8节 (16:00-17:40)', start: 7, end: 8 },
         { key: '910', label: '9-10节 (19:00-20:40)', start: 9, end: 10 }
       ],
+      weekOptions: Array.from({ length: 21 }, (_, index) => index + 1),
       courseList: [],
       scheduleDialogVisible: false,
       currentCourse: {
@@ -157,7 +170,7 @@ export default {
         })
         const page = resp.data || {}
         const rawCourses = page.list || []
-        const realCourses = rawCourses.filter(course => course && course.status !== 'DRAFT')
+        const realCourses = rawCourses.filter(course => course && Number(course.status) !== 0)
         const schedules = await Promise.all(realCourses.map(course => getCourseSchedule(course.id)))
         this.courseList = realCourses.map((course, index) => ({
           ...course,
@@ -183,6 +196,8 @@ export default {
         dayOfWeek: Number(item.dayOfWeek),
         sectionStart: Number(item.sectionStart),
         sectionEnd: Number(item.sectionEnd),
+        startWeek: Number(item.startWeek || 1),
+        endWeek: Number(item.endWeek || 21),
         periodKey: this.toPeriodKey(item.sectionStart, item.sectionEnd),
         location: item.location || ''
       }))
@@ -195,7 +210,8 @@ export default {
       const weekday = this.weekdays.find(day => day.value === Number(item.dayOfWeek))
       const period = this.periods.find(p => p.start === Number(item.sectionStart) && p.end === Number(item.sectionEnd))
       const location = item.location || '待定'
-      return `${weekday ? weekday.label : '未知'} ${period ? period.label : `${item.sectionStart}-${item.sectionEnd}节`} ${location}`
+      const periodText = period ? period.label : `${item.sectionStart}-${item.sectionEnd}节`
+      return `${weekday ? weekday.label : '未知'} ${periodText} 第${item.startWeek || 1}-${item.endWeek || 21}周 ${location}`
     },
     editSchedule(course) {
       this.currentCourse = {
@@ -214,6 +230,8 @@ export default {
         dayOfWeek: 1,
         sectionStart: period.start,
         sectionEnd: period.end,
+        startWeek: 1,
+        endWeek: 21,
         periodKey: period.key,
         location: ''
       })
@@ -250,6 +268,8 @@ export default {
             dayOfWeek: Number(item.dayOfWeek),
             sectionStart: Number(item.sectionStart),
             sectionEnd: Number(item.sectionEnd),
+            startWeek: Number(item.startWeek || 1),
+            endWeek: Number(item.endWeek || 21),
             location: item.location || ''
           })
         }
@@ -261,7 +281,7 @@ export default {
       }
     },
     async clearSchedule(course) {
-      await this.$confirm(`确定清空课程《${course.title}》的所有上课时间吗？`, '提示', {
+      await this.$confirm(`确定清空课程“${course.title}”的所有上课时间吗？`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -291,10 +311,12 @@ export default {
             dayOfWeek: weekday,
             sectionStart: period.start,
             sectionEnd: period.end,
-            location: '待定教室'
+            startWeek: 1,
+            endWeek: 16,
+            location: `自动排课教室${index + 1}`
           })
         }
-        this.$message.success('已为没有课表的真实课程补全默认时间')
+        this.$message.success('自动排课完成')
         await this.getList()
       } finally {
         this.autoScheduling = false
@@ -315,8 +337,8 @@ export default {
   margin-bottom: 16px;
 }
 
-.schedule-line + .schedule-line {
-  margin-top: 6px;
+.schedule-line {
+  line-height: 1.8;
 }
 
 .empty-text {
@@ -325,30 +347,23 @@ export default {
 
 .pagination {
   display: flex;
-  justify-content: center;
-  margin-top: 20px;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 
 .dialog-header {
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 16px;
-}
-
-.dialog-course {
-  font-size: 18px;
   font-weight: 600;
-}
-
-.dialog-teacher {
-  margin-top: 4px;
-  color: #606266;
 }
 
 .class-time-item {
   margin-bottom: 12px;
   padding: 12px;
+  background: #fafafa;
   border: 1px solid #ebeef5;
   border-radius: 6px;
-  background: #fafafa;
 }
 
 .add-row {

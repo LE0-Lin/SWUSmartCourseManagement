@@ -393,4 +393,22 @@ export default {
   border: 1px solid #ebeef5;
   border-radius: 6px;
 }
+
+::v-deep .class-time-item .el-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+::v-deep .class-time-item .el-col {
+  min-width: 180px;
+  margin-bottom: 8px;
+}
+
+::v-deep .class-time-item .el-form-item__label {
+  width: 72px !important;
+}
+
+::v-deep .class-time-item .el-form-item__content {
+  margin-left: 72px !important;
+}
 </style>
