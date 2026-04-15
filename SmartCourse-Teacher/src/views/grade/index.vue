@@ -15,6 +15,8 @@
         <el-tab-pane label="学生成绩" name="list">
           <el-table :data="grades" v-loading="loading" stripe style="width: 100%">
             <el-table-column prop="memberId" label="学员ID" width="100" />
+            <el-table-column prop="nickname" label="姓名" width="140" />
+            <el-table-column prop="email" label="邮箱" min-width="180" />
             <el-table-column label="分数" width="200">
               <template slot-scope="scope">
                 <el-input-number v-model="scope.row.score" :precision="2" :step="1" :min="0" :max="100" size="small" />

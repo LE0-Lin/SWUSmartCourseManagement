@@ -10,6 +10,13 @@ export function getCourseSchedule(courseId) {
   })
 }
 
+export function getMySchedule() {
+  return request({
+    url: `${api_prefix}/mine`,
+    method: 'get'
+  })
+}
+
 // 保存/更新课表安排
 export function saveSchedule(data) {
   return request({

@@ -92,10 +92,24 @@ export function getCourseGrade(courseId) {
   })
 }
 
+export function getTranscript() {
+  return request({
+    url: `${api_prefix}/get/grade/transcript`,
+    method: 'get'
+  })
+}
+
 // 获取课程安排/课表
 export function getCourseSchedule(courseId) {
   return request({
     url: `${api_prefix}/get/schedule/${courseId}`,
+    method: 'get'
+  })
+}
+
+export function getMySchedule() {
+  return request({
+    url: `${api_prefix}/get/schedule/my`,
     method: 'get'
   })
 }

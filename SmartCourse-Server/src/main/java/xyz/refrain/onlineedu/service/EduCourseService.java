@@ -140,10 +140,7 @@ public class EduCourseService {
 				.eq(Objects.nonNull(teacherId), EduCourseEntity::getTeacherId, teacherId)
 				.eq(Objects.nonNull(subjectId), EduCourseEntity::getSubjectId, subjectId)
 				// 发表的状态和二次审核状态的
-				.and(wrp -> wrp.eq(EduCourseEntity::getStatus, CourseStatusEnum.PUBLISH)
-						.or()
-						.eq(EduCourseEntity::getStatus, CourseStatusEnum.SECOND_AUDITING)
-				)
+				.eq(EduCourseEntity::getStatus, CourseStatusEnum.PUBLISH)
 				.like(StringUtils.hasText(title), EduCourseEntity::getTitle, title)
 				.orderByAsc(EduCourseEntity::getSort);
 		// 分页查询
@@ -469,6 +466,56 @@ public class EduCourseService {
 						.eq(RelCourseMemberEntity::getCourseId, courseId)
 		);
 		return RUtils.success("学员是否已订阅课程", count > 0);
+	}
+
+	public R selectCourse(int memberId, int courseId) {
+		EduCourseEntity course = eduCourseMapper.selectOne(
+				Wrappers.lambdaQuery(EduCourseEntity.class)
+						.select(EduCourseEntity::getId, EduCourseEntity::getEnable, EduCourseEntity::getStatus)
+						.eq(EduCourseEntity::getId, courseId)
+		);
+		if (Objects.isNull(course) || !Boolean.TRUE.equals(course.getEnable())
+				|| !CourseStatusEnum.PUBLISH.equals(course.getStatus())) {
+			return RUtils.fail("课程不存在或暂时不可选课");
+		}
+		Integer count = relCourseMemberMapper.selectCount(
+				Wrappers.lambdaQuery(RelCourseMemberEntity.class)
+						.eq(RelCourseMemberEntity::getMemberId, memberId)
+						.eq(RelCourseMemberEntity::getCourseId, courseId)
+		);
+		if (Objects.nonNull(count) && count > 0) {
+			return RUtils.success("您已选过该课程");
+		}
+		RelCourseMemberEntity relation = new RelCourseMemberEntity()
+				.setMemberId(memberId)
+				.setCourseId(courseId);
+		int insert = relCourseMemberMapper.insert(relation);
+		if (insert > 0) {
+			eduCourseMapper.update(null,
+					Wrappers.lambdaUpdate(EduCourseEntity.class)
+							.eq(EduCourseEntity::getId, courseId)
+							.setSql("buy_count = IFNULL(buy_count, 0) + 1"));
+			return RUtils.success("选课成功");
+		}
+		return RUtils.fail("选课失败");
+	}
+
+	public List<EduCourseEntity> listSelectedCourses(int memberId) {
+		List<RelCourseMemberEntity> relationList = relCourseMemberMapper.selectList(
+				Wrappers.lambdaQuery(RelCourseMemberEntity.class)
+						.select(RelCourseMemberEntity::getCourseId)
+						.eq(RelCourseMemberEntity::getMemberId, memberId)
+		);
+		if (CollectionUtils.isEmpty(relationList)) {
+			return Collections.emptyList();
+		}
+		Set<Integer> courseIds = relationList.stream()
+				.map(RelCourseMemberEntity::getCourseId)
+				.collect(Collectors.toSet());
+		return eduCourseMapper.selectList(
+				Wrappers.lambdaQuery(EduCourseEntity.class)
+						.in(EduCourseEntity::getId, courseIds)
+		);
 	}
 
 	/**

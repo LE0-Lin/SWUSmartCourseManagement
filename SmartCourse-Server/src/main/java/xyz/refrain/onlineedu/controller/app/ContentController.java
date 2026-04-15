@@ -161,10 +161,30 @@ public class ContentController {
 		return eduGradeService.getStudentGrade(courseId, member.getId());
 	}
 
+	@GetMapping("/get/grade/transcript")
+	@ApiOperation("获取学生成绩单")
+	public R getTranscript(HttpServletRequest request) {
+		UctrMemberDetail member = SessionUtils.getMember(request);
+		if (Objects.isNull(member)) {
+			return new R(RS.NOT_LOGIN.status(), "请登录后再操作");
+		}
+		return eduGradeService.getTranscript(member.getId());
+	}
+
 	@GetMapping("/get/schedule/{courseId}")
 	@ApiOperation("获取课程安排信息")
 	public R getSchedule(@PathVariable("courseId") @Min(1) Integer courseId) {
 		return eduCourseScheduleService.getScheduleByCourseId(courseId);
+	}
+
+	@GetMapping("/get/schedule/my")
+	@ApiOperation("获取当前学生的课表")
+	public R getMySchedule(HttpServletRequest request) {
+		UctrMemberDetail member = SessionUtils.getMember(request);
+		if (Objects.isNull(member)) {
+			return new R(RS.NOT_LOGIN.status(), "请登录后再操作");
+		}
+		return eduCourseScheduleService.getStudentSchedule(member.getId());
 	}
 
 	@PostMapping("/get/video/auth")
@@ -241,6 +261,26 @@ public class ContentController {
 		}
 
 		return r;
+	}
+
+	@PostMapping("/course/select/{courseId}")
+	@ApiOperation("直接选课")
+	public R selectCourse(@PathVariable("courseId") @Min(1) Integer courseId, HttpServletRequest request) {
+		UctrMemberDetail member = SessionUtils.getMember(request);
+		if (Objects.isNull(member)) {
+			return new R(RS.NOT_LOGIN.status(), "请登录后再操作");
+		}
+		return eduCourseService.selectCourse(member.getId(), courseId);
+	}
+
+	@GetMapping("/course/isselect/{courseId}")
+	@ApiOperation("判断学生是否已选课")
+	public R isSelectCourse(@PathVariable("courseId") @Min(1) Integer courseId, HttpServletRequest request) {
+		UctrMemberDetail member = SessionUtils.getMember(request);
+		if (Objects.isNull(member)) {
+			return new R(RS.NOT_LOGIN.status(), "请登录后再操作");
+		}
+		return eduCourseService.isBuyCourse(member.getId(), courseId);
 	}
 
 }

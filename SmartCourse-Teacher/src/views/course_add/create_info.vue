@@ -120,7 +120,7 @@
               </el-button>
               <div v-for="(time, index) in data.classTimes" :key="index" class="class-time-item">
                 <el-row :gutter="20">
-                  <el-col :span="6">
+                  <el-col :span="8">
                     <el-form-item label="星期：" :prop="`classTimes[${index}].weekday`">
                       <el-select v-model="time.weekday" placeholder="选择星期" style="width: 100%">
                         <el-option label="周一" value="1" />
@@ -133,7 +133,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6">
+                  <el-col :span="8">
                     <el-form-item label="课时：" :prop="`classTimes[${index}].period`">
                       <el-select v-model="time.period" placeholder="选择课时" style="width: 100%">
                         <el-option label="1-2节 (8:00-9:40)" value="12" />
@@ -154,7 +154,9 @@
                       <el-input-number v-model="time.endWeek" :min="1" :max="16" style="width: 100%" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="3">
+                </el-row>
+                <el-row :gutter="20">
+                  <el-col :span="8">
                     <el-form-item label="教学楼：" :prop="`classTimes[${index}].building`">
                       <el-select v-model="time.building" placeholder="选择教学楼" style="width: 100%" @change="onBuildingChange(index)">
                         <el-option label="A楼" value="A" />
@@ -165,14 +167,14 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="3">
+                  <el-col :span="8">
                     <el-form-item label="教室：" :prop="`classTimes[${index}].classroom`">
                       <el-select v-model="time.classroom" placeholder="选择教室" style="width: 100%">
                         <el-option v-for="classroom in getClassrooms(time.building)" :key="classroom" :label="classroom" :value="classroom" />
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="8">
                     <el-form-item label="操作：">
                       <el-button type="danger" size="small" @click="removeClassTime(index)">
                         <i class="el-icon-delete"></i> 删除

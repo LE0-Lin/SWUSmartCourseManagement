@@ -43,6 +43,13 @@ public class EduCourseScheduleController {
         return eduCourseScheduleService.getScheduleByCourseId(courseId);
     }
 
+    @GetMapping("/mine")
+    @ApiOperation("获取当前教师课表")
+    public R mine() {
+        EduTeacherDetail teacher = SessionUtils.getTeacher(IPUtils.getRequest());
+        return eduCourseScheduleService.getTeacherSchedule(teacher.getId());
+    }
+
     @PostMapping("/save")
     @ApiOperation("保存或更新课表安排")
     public R save(@RequestBody EduCourseScheduleEntity entity) {
