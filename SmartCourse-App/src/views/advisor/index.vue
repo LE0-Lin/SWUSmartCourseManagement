@@ -2,9 +2,11 @@
   <div class="advisor-page">
     <section class="advisor-hero">
       <div>
-        <p class="eyebrow">{{ dashboard.majorName || '计算机科学与技术' }}</p>
-        <h1>智能毕业路径模拟器</h1>
-        <p class="subline">基于培养方案、已选课程、成绩与课表冲突，自动推理毕业风险并生成补选方案。</p>
+        <p class="eyebrow">{{ dashboard.engineName || '培养方案数字孪生' }}</p>
+        <h1>可解释选课推理引擎</h1>
+        <p class="subline">
+          系统把当前选课、成绩和课表映射为毕业路径模型，模拟“如果现在补选这些课程，是否能降低毕业风险”。
+        </p>
       </div>
       <div class="risk-panel" :class="riskClass">
         <span>毕业风险</span>
@@ -63,7 +65,7 @@
       <div class="section-band">
         <div class="section-title compact">
           <div>
-            <p class="eyebrow">AI Path</p>
+            <p class="eyebrow">What-if Simulation</p>
             <h2>一键补齐方案</h2>
           </div>
         </div>
@@ -110,22 +112,36 @@
         <el-button icon="el-icon-refresh" size="small" @click="fetchDashboard">重新分析</el-button>
       </div>
       <div class="recommend-grid">
-        <div v-for="course in recommendations" :key="course.courseId" class="recommend-card">
+        <div
+          v-for="course in recommendations"
+          :key="course.courseId"
+          class="recommend-card"
+          :class="{ 'is-conflict': course.conflict }"
+        >
           <div class="recommend-head">
             <el-tag size="mini" effect="dark">{{ course.typeLabel }}</el-tag>
+            <el-tag v-if="course.conflict" size="mini" type="danger" effect="dark">课表冲突</el-tag>
+            <el-tag v-else size="mini" type="success">可选</el-tag>
             <span>{{ formatCredit(course.credit) }} 学分</span>
           </div>
           <h3>{{ course.title }}</h3>
           <p>{{ course.reason }}</p>
+          <div v-if="course.conflict" class="conflict-text">{{ course.conflictText }}</div>
           <div class="schedule">{{ course.scheduleText }}</div>
           <div class="fit">
             <span>匹配度</span>
-            <el-progress :percentage="Number(course.fitScore || 0)" :stroke-width="8" color="#2f9e8f" />
+            <el-progress :percentage="Number(course.fitScore || 0)" :stroke-width="8" :color="course.conflict ? '#d9480f' : '#2f9e8f'" />
           </div>
-          <el-button type="primary" size="small" plain @click="diagnose(course.courseId)">选课诊断</el-button>
+          <el-button
+            :type="course.conflict ? 'danger' : 'primary'"
+            size="small"
+            plain
+            :disabled="course.conflict"
+            @click="diagnose(course.courseId)"
+          >{{ course.conflict ? '存在冲突' : '选课诊断' }}</el-button>
         </div>
       </div>
-      <el-empty v-if="!loading && recommendations.length === 0" description="暂无无冲突推荐课程" />
+      <el-empty v-if="!loading && recommendations.length === 0" description="暂无推荐课程" />
     </section>
   </div>
 </template>
@@ -223,7 +239,7 @@ export default {
   }
 
   .subline {
-    max-width: 620px;
+    max-width: 680px;
     margin: 0;
     line-height: 1.8;
     color: rgba(255, 255, 255, .78);
@@ -352,6 +368,11 @@ export default {
   gap: 8px;
 }
 
+.recommend-head {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .requirement-top {
   margin-bottom: 12px;
 }
@@ -427,6 +448,26 @@ export default {
     color: #5f6b76;
     line-height: 1.5;
   }
+}
+
+.recommend-card.is-conflict {
+  border-color: #f1b0a0;
+  background: #fff7f5;
+
+  h3 {
+    color: #9f2d12;
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+  }
+}
+
+.conflict-text {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #ffe8e0;
+  color: #9f2d12;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .schedule {

@@ -34,9 +34,31 @@ Note: public required and general elective courses.
 
 Student system
 URL: http://localhost:9530
-Username: 13800138000
+Username: 222023321102093
 Password: 123456
-Note: student login uses mobile number.
+Note: student login now uses student number.
+
+Student demo class accounts
+---------------------------
+All use the Student system URL: http://localhost:9530
+Password for every account: 123456
+
+222023321102093
+222023321102094
+222023321102095
+222023321102096
+222023321102097
+222023321102098
+222023321102099
+222023321102100
+222023321102101
+222023321102102
+222023321102103
+222023321102104
+222023321102105
+222023321102106
+222023321102107
+222023321102108
 
 Current local database account also verified
 --------------------------------------------

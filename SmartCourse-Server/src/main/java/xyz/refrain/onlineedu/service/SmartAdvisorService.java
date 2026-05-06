@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,7 +34,7 @@ public class SmartAdvisorService {
         List<Map<String, Object>> selectedSchedules = querySchedulesForCourses(courseIds(selectedCourses));
         Map<String, Requirement> requirements = buildRequirements();
         Map<String, CreditBucket> buckets = summarizeCredits(requirements, selectedCourses);
-        List<Map<String, Object>> recommendations = buildRecommendations(memberId, selectedCourses, selectedSchedules, buckets);
+        List<Map<String, Object>> recommendations = buildRecommendations(selectedCourses, selectedSchedules, buckets);
         List<Map<String, Object>> pathPlan = buildPathPlan(recommendations, buckets);
 
         double completedCredits = buckets.values().stream().mapToDouble(CreditBucket::getCompletedCredits).sum();
@@ -47,6 +45,7 @@ public class SmartAdvisorService {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("majorName", DEFAULT_MAJOR);
+        result.put("engineName", "培养方案数字孪生 + 可解释选课推理引擎");
         result.put("summary", buildSummary(completedCredits, projectedCredits, requiredCredits, completionRate, projectedRate, buckets));
         result.put("requirements", new ArrayList<>(buckets.values()));
         result.put("selectedCourses", selectedCourses);
@@ -59,7 +58,7 @@ public class SmartAdvisorService {
     @SuppressWarnings("unchecked")
     public R getAdminOverview() {
         List<Map<String, Object>> members = jdbcTemplate.queryForList(
-                "SELECT id AS memberId, nickname, mobile, email FROM uctr_member WHERE enable = 1 ORDER BY id ASC"
+                "SELECT id AS memberId, nickname, mobile, email FROM uctr_member WHERE enable = 1 ORDER BY mobile ASC"
         );
         List<Map<String, Object>> riskRows = new ArrayList<>();
         int high = 0;
@@ -107,7 +106,7 @@ public class SmartAdvisorService {
         Map<String, Object> conflict = findFirstConflict(selectedSchedules, targetSchedules);
         if (conflict != null) {
             return RUtils.success("选课诊断", diagnosis(false, "TIME_CONFLICT",
-                    "该课程与《" + conflict.get("selectedTitle") + "》存在时间冲突。"));
+                    "该课程与《" + conflict.get("selectedTitle") + "》存在上课时间冲突。"));
         }
         Map<String, Object> course = queryCourse(courseId);
         if (course == null) {
@@ -121,7 +120,7 @@ public class SmartAdvisorService {
         double remaining = bucket == null ? 0 : bucket.getRemainingAfterCurrent();
         String reason = remaining > 0
                 ? "该课程可补充" + label + "学分缺口，且与当前课表不冲突。"
-                : "该课程与当前课表不冲突，可作为拓展选修。";
+                : "该课程与当前课表不冲突，可作为能力拓展课程。";
         return RUtils.success("选课诊断", diagnosis(true, "OK", reason));
     }
 
@@ -171,7 +170,7 @@ public class SmartAdvisorService {
         if (!pathPlan.isEmpty()) {
             Map<String, Object> note = new LinkedHashMap<>();
             note.put("level", "success");
-            note.put("text", "已生成一套本学期补齐路径，可作为选课模拟方案。");
+            note.put("text", "已生成一套本学期补齐路径，可作为 what-if 选课模拟方案。");
             notes.add(note);
         }
         if (notes.isEmpty()) {
@@ -183,8 +182,7 @@ public class SmartAdvisorService {
         return notes;
     }
 
-    private List<Map<String, Object>> buildRecommendations(int memberId,
-                                                           List<Map<String, Object>> selectedCourses,
+    private List<Map<String, Object>> buildRecommendations(List<Map<String, Object>> selectedCourses,
                                                            List<Map<String, Object>> selectedSchedules,
                                                            Map<String, CreditBucket> buckets) {
         Set<Integer> selectedCourseIds = courseIds(selectedCourses);
@@ -202,29 +200,39 @@ public class SmartAdvisorService {
             int courseId = asInt(candidate.get("courseId"));
             List<Map<String, Object>> targetSchedules = querySchedulesForCourses(new LinkedHashSet<>(Collections.singletonList(courseId)));
             Map<String, Object> conflict = findFirstConflict(selectedSchedules, targetSchedules);
-            if (conflict != null) {
-                continue;
-            }
             String type = asString(candidate.get("courseType"), "MAJOR_ELECTIVE");
             CreditBucket bucket = buckets.get(type);
             double remaining = bucket == null ? 0 : bucket.getRemainingAfterCurrent();
             double credit = asDouble(candidate.get("credit"), 2);
-            int score = (int) Math.round(Math.max(0, remaining) * 15 + credit * 8
+            int rawScore = (int) Math.round(Math.max(0, remaining) * 15 + credit * 8
                     + asInt(candidate.get("selectCount")) * 2 + asInt(candidate.get("viewCount")));
+            boolean selectable = conflict == null;
             Map<String, Object> item = new LinkedHashMap<>(candidate);
             item.put("typeLabel", courseTypeLabel(type));
             item.put("credit", credit);
-            item.put("fitScore", Math.min(100, Math.max(55, score)));
-            item.put("reason", remaining > 0
-                    ? "补齐" + courseTypeLabel(type) + "缺口，预计贡献 " + formatCredit(credit) + " 学分"
-                    : "无时间冲突，可作为能力拓展课程");
+            item.put("selectable", selectable);
+            item.put("conflict", !selectable);
+            item.put("conflictTitle", conflict == null ? "" : conflict.get("selectedTitle"));
+            item.put("conflictText", conflict == null ? "" : "与《" + conflict.get("selectedTitle") + "》上课时间冲突");
+            item.put("fitScore", selectable ? Math.min(100, Math.max(55, rawScore)) : Math.min(72, Math.max(45, rawScore / 2)));
+            item.put("reason", buildRecommendationReason(courseTypeLabel(type), credit, remaining, conflict));
             item.put("scheduleText", scheduleText(targetSchedules));
             result.add(item);
         }
         return result.stream()
                 .sorted((left, right) -> Integer.compare(asInt(right.get("fitScore")), asInt(left.get("fitScore"))))
-                .limit(6)
+                .limit(12)
                 .collect(Collectors.toList());
+    }
+
+    private String buildRecommendationReason(String typeLabel, double credit, double remaining, Map<String, Object> conflict) {
+        String base = remaining > 0
+                ? "可补齐" + typeLabel + "缺口，预计贡献 " + formatCredit(credit) + " 学分"
+                : "当前学分缺口不明显，可作为能力拓展课程";
+        if (conflict == null) {
+            return base + "，且与当前课表不冲突。";
+        }
+        return base + "，但与《" + conflict.get("selectedTitle") + "》冲突，暂不建议本轮选择。";
     }
 
     private List<Map<String, Object>> buildPathPlan(List<Map<String, Object>> recommendations,
@@ -235,6 +243,9 @@ public class SmartAdvisorService {
         }
         List<Map<String, Object>> path = new ArrayList<>();
         for (Map<String, Object> course : recommendations) {
+            if (!Boolean.TRUE.equals(course.get("selectable"))) {
+                continue;
+            }
             String type = asString(course.get("courseType"), "MAJOR_ELECTIVE");
             double need = missing.getOrDefault(type, 0.0);
             if (need <= 0) {
@@ -315,7 +326,7 @@ public class SmartAdvisorService {
     private Map<String, Requirement> buildRequirements() {
         Map<String, Requirement> map = new LinkedHashMap<>();
         map.put("PUBLIC_REQUIRED", new Requirement("PUBLIC_REQUIRED", "公共必修", 4));
-        map.put("MAJOR_REQUIRED", new Requirement("MAJOR_REQUIRED", "专业必修", 6));
+        map.put("MAJOR_REQUIRED", new Requirement("MAJOR_REQUIRED", "专业必修", 18));
         map.put("MAJOR_ELECTIVE", new Requirement("MAJOR_ELECTIVE", "专业选修", 6));
         map.put("GENERAL_ELECTIVE", new Requirement("GENERAL_ELECTIVE", "通识选修", 4));
         return map;
@@ -363,7 +374,8 @@ public class SmartAdvisorService {
         }
         return schedules.stream().map(item -> "周" + weekday(asInt(item.get("dayOfWeek")))
                 + " 第" + item.get("sectionStart") + "-" + item.get("sectionEnd") + "节"
-                + " / " + asInt(item.get("startWeek"), 1) + "-" + asInt(item.get("endWeek"), 21) + "周")
+                + " / " + asInt(item.get("startWeek"), 1) + "-" + asInt(item.get("endWeek"), 21) + "周"
+                + (item.get("location") == null ? "" : " / " + item.get("location")))
                 .collect(Collectors.joining("；"));
     }
 

@@ -233,7 +233,7 @@ DROP TABLE IF EXISTS `edu_teacher`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `edu_teacher` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '讲师ID',
-  `mobile` char(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '手机号',
+  `mobile` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '学号/登录账号',
   `email` varchar(127) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '邮箱地址',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '密码',
   `name` varchar(63) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '讲师姓名',
@@ -252,10 +252,10 @@ CREATE TABLE `edu_teacher` (
 ) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='讲师表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `edu_teacher` VALUES (1,'13800138001','teacher@example.com','123456','teacher','Default demo teacher account','/api/pub/image/default-teacher.png','',80,0,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
-INSERT INTO `edu_teacher` VALUES (2,'13800138002','teacher_cs@example.com','123456','teacher_cs','Computer science demo teacher','/api/pub/image/default-teacher.png','',80,10,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
-INSERT INTO `edu_teacher` VALUES (3,'13800138003','teacher_ai@example.com','123456','teacher_ai','AI elective demo teacher','/api/pub/image/default-teacher.png','',80,20,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
-INSERT INTO `edu_teacher` VALUES (4,'13800138004','teacher_public@example.com','123456','teacher_public','Public elective demo teacher','/api/pub/image/default-teacher.png','',80,30,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (1,'13800138001','teacher@example.com','123456','teacher','Default demo teacher account','/api/pub/image/demo/teacher-avatar-01.jpg','',80,0,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (2,'13800138002','teacher_cs@example.com','123456','teacher_cs','Computer science demo teacher','/api/pub/image/demo/teacher-avatar-02.jpg','',80,10,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (3,'13800138003','teacher_ai@example.com','123456','teacher_ai','AI elective demo teacher','/api/pub/image/demo/teacher-avatar-03.jpg','',80,20,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (4,'13800138004','teacher_public@example.com','123456','teacher_public','Public elective demo teacher','/api/pub/image/demo/teacher-avatar-04.jpg','',80,30,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
 
 --
 -- Table structure for table `edu_video`
@@ -346,8 +346,9 @@ CREATE TABLE `rel_course_member` (
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `idx_course_id` (`course_id`) USING BTREE,
-  UNIQUE KEY `idx_member_id` (`member_id`) USING BTREE,
+  KEY `idx_course_id` (`course_id`) USING BTREE,
+  KEY `idx_member_id` (`member_id`) USING BTREE,
+  UNIQUE KEY `uk_member_course` (`member_id`,`course_id`) USING BTREE,
   KEY `idx_member_course` (`member_id`,`course_id`) USING BTREE COMMENT '联合索引(member_id, course_id)'
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='课程订阅-学员关系表';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -458,7 +459,7 @@ CREATE TABLE `uctr_member` (
 
 LOCK TABLES `uctr_member` WRITE;
 /*!40000 ALTER TABLE `uctr_member` DISABLE KEYS */;
-INSERT INTO `uctr_member` VALUES (1,'13800138000','student@example.com','123456','学生','1','20','https://c-ssl.duitang.com/uploads/item/201912/05/20191205152830_ULrYx.thumb.300_0.jpeg','无心插柳柳成荫，没什么期待才会偶遇惊喜！',1,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `uctr_member` VALUES (1,'222023321102093','222023321102093@swu.edu.cn','123456','计科2301-张同学','1','20','','计算机科学与技术2023级演示学生',1,'2022-02-20 18:26:37','2021-01-18 19:40:03');
 /*!40000 ALTER TABLE `uctr_member` ENABLE KEYS */;
 UNLOCK TABLES;
 
