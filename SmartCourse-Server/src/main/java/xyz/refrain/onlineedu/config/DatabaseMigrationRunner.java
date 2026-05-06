@@ -20,6 +20,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         createScheduleTable();
         createGradeTable();
         ensureScheduleWeekColumns();
+        seedDefaultTeacherIfNeeded();
         seedDemoDataIfNeeded();
     }
 
@@ -71,6 +72,28 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         if (endWeekColumn != null && endWeekColumn == 0) {
             jdbcTemplate.execute("ALTER TABLE `edu_course_schedule` ADD COLUMN `end_week` tinyint unsigned NOT NULL DEFAULT 21 AFTER `start_week`");
         }
+    }
+
+    private void seedDefaultTeacherIfNeeded() {
+        Integer teacherCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM edu_teacher WHERE mobile = '13800138001' OR name = 'teacher'",
+                Integer.class
+        );
+        if (teacherCount != null && teacherCount > 0) {
+            jdbcTemplate.update(
+                    "UPDATE edu_teacher SET password = '123456', enable = 1, status = 0 "
+                            + "WHERE mobile = '13800138001' OR name = 'teacher'"
+            );
+            return;
+        }
+
+        jdbcTemplate.update(
+                "INSERT INTO edu_teacher(mobile, email, password, name, intro, avatar, resume, division, sort, enable, status) "
+                        + "VALUES ('13800138001', 'teacher@example.com', '123456', "
+                        + "'teacher', 'Default demo teacher account', "
+                        + "'/api/pub/image/default-teacher.png', '', 80, 0, 1, 0)"
+        );
+        log.info("Seeded default teacher account 13800138001 / 123456");
     }
 
     private void seedDemoDataIfNeeded() {

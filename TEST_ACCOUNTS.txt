@@ -1,0 +1,60 @@
+SmartCourse Test Accounts
+=========================
+
+Last verified: 2026-05-06
+
+Main verified accounts
+----------------------
+Admin system
+URL: http://localhost:9528
+Username: admin
+Password: 123456
+
+Teacher system
+URL: http://localhost:9529
+Username: 13800138001
+Password: 123456
+Note: teacher login uses mobile number.
+
+Student system
+URL: http://localhost:9530
+Username: 13800138000
+Password: 123456
+Note: student login uses mobile number.
+
+Current local database account also verified
+--------------------------------------------
+Teacher system
+URL: http://localhost:9529
+Username: 18585922669
+Password: 123456
+Note: this account exists in the current local database, but it is not guaranteed after a fresh schema import.
+
+Admin seed accounts in schema.sql
+---------------------------------
+These accounts belong to the admin system account table acl_user.
+They use the Admin system URL: http://localhost:9528
+
+admin / 123456 / enabled
+teacher / 123456 / enabled
+student / 123456 / enabled
+tch3 / 123456 / enabled
+tch4 / 123456 / enabled
+tch5 / 123456 / disabled
+tch6 / 123456 / enabled
+tch7 / 123456 / disabled
+tch8 / 123456 / enabled
+tch9 / 123456 / enabled
+tch10 / 123456 / enabled
+tch11 / 123456 / enabled
+tch12 / 123456 / disabled
+tch13 / 123456 / enabled
+tch14 / 123456 / enabled
+tch15 / 123456 / disabled
+tch16 / 123456 / enabled
+
+Important notes
+---------------
+1. Admin usernames are text usernames.
+2. Teacher and student frontends use mobile numbers as usernames.
+3. If login suddenly shows Network Error, check whether the backend is listening on http://localhost:9096.

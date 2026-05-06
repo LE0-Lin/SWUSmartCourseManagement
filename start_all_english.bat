@@ -271,8 +271,8 @@ echo ^<!DOCTYPE html^>
         ^<div class="test-section"^>
             ^<h2^>Test Accounts^</h2^>
             ^<p^>^<strong^>Admin:^</strong^> Username: admin, Password: 123456^</p^>
-            ^<p^>^<strong^>Teacher:^</strong^> Username: teacher, Password: 123456^</p^>
-            ^<p^>^<strong^>Student:^</strong^> Username: student, Password: 123456^</p^>
+            ^<p^>^<strong^>Teacher:^</strong^> Username: 13800138001, Password: 123456^</p^>
+            ^<p^>^<strong^>Student:^</strong^> Username: 13800138000, Password: 123456^</p^>
         ^</div^>
         
         ^<div class="test-section"^>
@@ -307,8 +307,8 @@ echo - Student System: http://localhost:9530
 echo.
 echo Test Accounts:
 echo - Admin: admin / 123456
-echo - Teacher: teacher / 123456
-echo - Student: student / 123456
+echo - Teacher: 13800138001 / 123456
+echo - Student: 13800138000 / 123456
 
 echo.
 echo ==============================================
