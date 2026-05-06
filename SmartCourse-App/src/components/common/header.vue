@@ -43,6 +43,11 @@
                 我的成绩单
               </el-dropdown-item>
             </router-link>
+            <router-link :to="{name: 'SmartAdvisor'}">
+              <el-dropdown-item icon="el-icon-data-analysis">
+                智能毕业路径
+              </el-dropdown-item>
+            </router-link>
             <el-dropdown-item divided icon="el-icon-switch-button" @click.native="logout">
               退出登录
             </el-dropdown-item>

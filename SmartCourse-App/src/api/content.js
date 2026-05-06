@@ -175,3 +175,17 @@ export function getIsSelectCourse(courseId) {
     method: 'get'
   })
 }
+
+export function getSmartAdvisorDashboard() {
+  return request({
+    url: '/api/app/smart/advisor/dashboard',
+    method: 'get'
+  })
+}
+
+export function diagnoseCourse(courseId) {
+  return request({
+    url: `/api/app/smart/advisor/diagnose/course/${courseId}`,
+    method: 'get'
+  })
+}

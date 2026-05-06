@@ -135,6 +135,21 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/smart',
+    component: Layout,
+    redirect: '/smart/graduation',
+    name: 'Smart',
+    meta: { title: '智能预警', icon: 'el-icon-data-analysis' },
+    children: [
+      {
+        path: 'graduation',
+        name: 'SmartGraduation',
+        component: () => import('@/views/smart/graduation'),
+        meta: { title: '毕业预警', icon: 'el-icon-magic-stick' }
+      }
+    ]
+  },
   // 讲师管理
   {
     path: '/tch',

@@ -20,7 +20,10 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         createScheduleTable();
         createGradeTable();
         ensureScheduleWeekColumns();
+        ensureCourseAdvisorColumns();
+        seedCourseAdvisorData();
         seedDefaultTeacherIfNeeded();
+        seedAdvisorDemoCoursesIfNeeded();
         seedDemoDataIfNeeded();
     }
 
@@ -74,6 +77,38 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         }
     }
 
+    private void ensureCourseAdvisorColumns() {
+        addColumnIfMissing("edu_course", "credit",
+                "ALTER TABLE `edu_course` ADD COLUMN `credit` double NOT NULL DEFAULT 2 AFTER `lesson_num`");
+        addColumnIfMissing("edu_course", "course_type",
+                "ALTER TABLE `edu_course` ADD COLUMN `course_type` varchar(32) NOT NULL DEFAULT 'MAJOR_ELECTIVE' AFTER `credit`");
+        addColumnIfMissing("edu_course", "major_name",
+                "ALTER TABLE `edu_course` ADD COLUMN `major_name` varchar(64) NOT NULL DEFAULT '计算机科学与技术' AFTER `course_type`");
+    }
+
+    private void addColumnIfMissing(String tableName, String columnName, String alterSql) {
+        Integer columnCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS "
+                        + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+                Integer.class,
+                tableName,
+                columnName
+        );
+        if (columnCount != null && columnCount == 0) {
+            jdbcTemplate.execute(alterSql);
+        }
+    }
+
+    private void seedCourseAdvisorData() {
+        jdbcTemplate.update("UPDATE edu_course SET credit = 2 WHERE credit IS NULL OR credit <= 0");
+        jdbcTemplate.update("UPDATE edu_course SET course_type = 'MAJOR_ELECTIVE' WHERE course_type IS NULL OR course_type = ''");
+        jdbcTemplate.update("UPDATE edu_course SET major_name = '计算机科学与技术' WHERE major_name IS NULL OR major_name = ''");
+        jdbcTemplate.update("UPDATE edu_course SET course_type = 'PUBLIC_REQUIRED', credit = 2 WHERE MOD(id, 4) = 1");
+        jdbcTemplate.update("UPDATE edu_course SET course_type = 'MAJOR_REQUIRED', credit = 3 WHERE MOD(id, 4) = 2");
+        jdbcTemplate.update("UPDATE edu_course SET course_type = 'MAJOR_ELECTIVE', credit = 2 WHERE MOD(id, 4) = 3");
+        jdbcTemplate.update("UPDATE edu_course SET course_type = 'GENERAL_ELECTIVE', credit = 2 WHERE MOD(id, 4) = 0");
+    }
+
     private void seedDefaultTeacherIfNeeded() {
         Integer teacherCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM edu_teacher WHERE mobile = '13800138001' OR name = 'teacher'",
@@ -94,6 +129,73 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                         + "'/api/pub/image/default-teacher.png', '', 80, 0, 1, 0)"
         );
         log.info("Seeded default teacher account 13800138001 / 123456");
+    }
+
+    private void seedAdvisorDemoCoursesIfNeeded() {
+        Integer teacherId = jdbcTemplate.query(
+                "SELECT id FROM edu_teacher WHERE mobile = '13800138001' OR name = 'teacher' ORDER BY id ASC LIMIT 1",
+                rs -> rs.next() ? rs.getInt(1) : null
+        );
+        Integer subjectId = jdbcTemplate.query(
+                "SELECT id FROM edu_subject ORDER BY id ASC LIMIT 1",
+                rs -> rs.next() ? rs.getInt(1) : 1
+        );
+        if (teacherId == null) {
+            return;
+        }
+
+        ensureDemoCourse("大学英语综合训练", "PUBLIC_REQUIRED", 2, teacherId, subjectId, 1, 1, 2, "A101");
+        ensureDemoCourse("数据结构", "MAJOR_REQUIRED", 3, teacherId, subjectId, 2, 3, 4, "B203");
+        ensureDemoCourse("操作系统", "MAJOR_REQUIRED", 3, teacherId, subjectId, 3, 1, 2, "B204");
+        ensureDemoCourse("人工智能导论", "MAJOR_ELECTIVE", 2, teacherId, subjectId, 4, 5, 6, "C301");
+        ensureDemoCourse("数据可视化", "MAJOR_ELECTIVE", 2, teacherId, subjectId, 5, 3, 4, "C302");
+        ensureDemoCourse("创新创业基础", "GENERAL_ELECTIVE", 2, teacherId, subjectId, 2, 7, 8, "D105");
+        ensureDemoCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, teacherId, subjectId, 5, 7, 8, "D201");
+    }
+
+    private void ensureDemoCourse(String title, String courseType, double credit, int teacherId, int subjectId,
+                                  int dayOfWeek, int sectionStart, int sectionEnd, String location) {
+        Integer courseId = jdbcTemplate.query(
+                "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
+                rs -> rs.next() ? rs.getInt(1) : null,
+                title
+        );
+        if (courseId == null) {
+            jdbcTemplate.update(
+                    "INSERT INTO edu_course(teacher_id, subject_id, title, price, lesson_num, credit, course_type, "
+                            + "major_name, cover, description, buy_count, view_count, sort, enable, status, remarks) "
+                            + "VALUES (?, ?, ?, 0, 32, ?, ?, '计算机科学与技术', '/api/pub/image/default-course.png', "
+                            + "?, 0, 0, 0, 1, 1, '')",
+                    teacherId, subjectId, title, credit, courseType,
+                    "智能课程管理系统演示课程：" + title
+            );
+            courseId = jdbcTemplate.query(
+                    "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
+                    rs -> rs.next() ? rs.getInt(1) : null,
+                    title
+            );
+        } else {
+            jdbcTemplate.update(
+                    "UPDATE edu_course SET credit = ?, course_type = ?, major_name = '计算机科学与技术', "
+                            + "enable = 1, status = 1 WHERE id = ?",
+                    credit, courseType, courseId
+            );
+        }
+        if (courseId == null) {
+            return;
+        }
+        Integer scheduleCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM edu_course_schedule WHERE course_id = ?",
+                Integer.class,
+                courseId
+        );
+        if (scheduleCount != null && scheduleCount == 0) {
+            jdbcTemplate.update(
+                    "INSERT INTO edu_course_schedule(course_id, day_of_week, section_start, section_end, start_week, end_week, location) "
+                            + "VALUES (?, ?, ?, ?, 1, 16, ?)",
+                    courseId, dayOfWeek, sectionStart, sectionEnd, location
+            );
+        }
     }
 
     private void seedDemoDataIfNeeded() {

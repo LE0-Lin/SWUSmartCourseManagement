@@ -89,6 +89,12 @@ export default new Router({
           name: 'Transcript',
           meta: { title: 'Transcript' },
           component: () => import('@/views/grade/transcript')
+        },
+        {
+          path: '/user/advisor',
+          name: 'SmartAdvisor',
+          meta: { title: 'Smart Advisor' },
+          component: () => import('@/views/advisor/index')
         }
       ]
     },

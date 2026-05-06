@@ -57,6 +57,9 @@ public class EduCourseService {
 	@Resource
 	private RelCourseMemberMapper relCourseMemberMapper;
 
+	@Resource
+	private EduCourseScheduleMapper eduCourseScheduleMapper;
+
 	@Autowired
 	private EduSubjectService eduSubjectService;
 
@@ -486,6 +489,10 @@ public class EduCourseService {
 		if (Objects.nonNull(count) && count > 0) {
 			return RUtils.success("您已选过该课程");
 		}
+		String conflictTitle = findScheduleConflict(memberId, courseId);
+		if (StringUtils.hasText(conflictTitle)) {
+			return RUtils.fail("选课冲突：该课程与《" + conflictTitle + "》上课时间冲突");
+		}
 		RelCourseMemberEntity relation = new RelCourseMemberEntity()
 				.setMemberId(memberId)
 				.setCourseId(courseId);
@@ -521,6 +528,61 @@ public class EduCourseService {
 	/**
 	 * 获取讲师所有的课程ID
 	 */
+	private String findScheduleConflict(int memberId, int targetCourseId) {
+		List<EduCourseScheduleEntity> targetSchedules = eduCourseScheduleMapper.selectList(
+				Wrappers.lambdaQuery(EduCourseScheduleEntity.class)
+						.eq(EduCourseScheduleEntity::getCourseId, targetCourseId)
+		);
+		if (CollectionUtils.isEmpty(targetSchedules)) {
+			return null;
+		}
+		List<RelCourseMemberEntity> relationList = relCourseMemberMapper.selectList(
+				Wrappers.lambdaQuery(RelCourseMemberEntity.class)
+						.select(RelCourseMemberEntity::getCourseId)
+						.eq(RelCourseMemberEntity::getMemberId, memberId)
+		);
+		if (CollectionUtils.isEmpty(relationList)) {
+			return null;
+		}
+		Set<Integer> selectedCourseIds = relationList.stream()
+				.map(RelCourseMemberEntity::getCourseId)
+				.collect(Collectors.toSet());
+		List<EduCourseScheduleEntity> selectedSchedules = eduCourseScheduleMapper.selectList(
+				Wrappers.lambdaQuery(EduCourseScheduleEntity.class)
+						.in(EduCourseScheduleEntity::getCourseId, selectedCourseIds)
+		);
+		if (CollectionUtils.isEmpty(selectedSchedules)) {
+			return null;
+		}
+		for (EduCourseScheduleEntity selected : selectedSchedules) {
+			for (EduCourseScheduleEntity target : targetSchedules) {
+				if (isScheduleConflict(selected, target)) {
+					EduCourseEntity selectedCourse = eduCourseMapper.selectOne(
+							Wrappers.lambdaQuery(EduCourseEntity.class)
+									.select(EduCourseEntity::getTitle)
+									.eq(EduCourseEntity::getId, selected.getCourseId())
+					);
+					return selectedCourse == null ? "已选课程" : selectedCourse.getTitle();
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isScheduleConflict(EduCourseScheduleEntity selected, EduCourseScheduleEntity target) {
+		if (!Objects.equals(selected.getDayOfWeek(), target.getDayOfWeek())) {
+			return false;
+		}
+		int selectedStartWeek = Objects.isNull(selected.getStartWeek()) ? 1 : selected.getStartWeek();
+		int selectedEndWeek = Objects.isNull(selected.getEndWeek()) ? 21 : selected.getEndWeek();
+		int targetStartWeek = Objects.isNull(target.getStartWeek()) ? 1 : target.getStartWeek();
+		int targetEndWeek = Objects.isNull(target.getEndWeek()) ? 21 : target.getEndWeek();
+		boolean weekOverlap = selectedStartWeek <= targetEndWeek && targetStartWeek <= selectedEndWeek;
+		boolean sectionOverlap = selected.getSectionStart() <= target.getSectionEnd()
+				&& target.getSectionStart() <= selected.getSectionEnd();
+		return weekOverlap && sectionOverlap;
+	}
+
 	public Set<Integer> getTeacherCourseIds(int teacherId) {
 		List<EduCourseEntity> entityList = eduCourseMapper.selectList(
 				Wrappers.lambdaQuery(EduCourseEntity.class)
