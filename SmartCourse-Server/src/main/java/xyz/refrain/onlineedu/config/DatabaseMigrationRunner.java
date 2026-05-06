@@ -23,6 +23,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         ensureCourseAdvisorColumns();
         seedCourseAdvisorData();
         seedDefaultTeacherIfNeeded();
+        seedDemoTeachersIfNeeded();
         seedAdvisorDemoCoursesIfNeeded();
         seedDemoDataIfNeeded();
     }
@@ -131,6 +132,52 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         log.info("Seeded default teacher account 13800138001 / 123456");
     }
 
+    private void seedDemoTeachersIfNeeded() {
+        ensureTeacher("13800138002", "teacher_cs@example.com", "teacher_cs", "Computer science demo teacher", 10);
+        ensureTeacher("13800138003", "teacher_ai@example.com", "teacher_ai", "AI elective demo teacher", 20);
+        ensureTeacher("13800138004", "teacher_public@example.com", "teacher_public", "Public elective demo teacher", 30);
+    }
+
+    private void ensureTeacher(String mobile, String email, String name, String intro, int sort) {
+        Integer teacherCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM edu_teacher WHERE mobile = ? OR name = ?",
+                Integer.class,
+                mobile,
+                name
+        );
+        if (teacherCount != null && teacherCount > 0) {
+            jdbcTemplate.update(
+                    "UPDATE edu_teacher SET password = '123456', email = ?, intro = ?, enable = 1, status = 0, sort = ? "
+                            + "WHERE mobile = ? OR name = ?",
+                    email,
+                    intro,
+                    sort,
+                    mobile,
+                    name
+            );
+            return;
+        }
+        jdbcTemplate.update(
+                "INSERT INTO edu_teacher(mobile, email, password, name, intro, avatar, resume, division, sort, enable, status) "
+                        + "VALUES (?, ?, '123456', ?, ?, '/api/pub/image/default-teacher.png', '', 80, ?, 1, 0)",
+                mobile,
+                email,
+                name,
+                intro,
+                sort
+        );
+        log.info("Seeded demo teacher account {} / 123456", mobile);
+    }
+
+    private int getTeacherIdByMobile(String mobile, int fallbackTeacherId) {
+        Integer teacherId = jdbcTemplate.query(
+                "SELECT id FROM edu_teacher WHERE mobile = ? ORDER BY id ASC LIMIT 1",
+                rs -> rs.next() ? rs.getInt(1) : null,
+                mobile
+        );
+        return teacherId == null ? fallbackTeacherId : teacherId;
+    }
+
     private void seedAdvisorDemoCoursesIfNeeded() {
         Integer teacherId = jdbcTemplate.query(
                 "SELECT id FROM edu_teacher WHERE mobile = '13800138001' OR name = 'teacher' ORDER BY id ASC LIMIT 1",
@@ -143,6 +190,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         if (teacherId == null) {
             return;
         }
+        ensureDemoCourse("\u9ad8\u7b49\u6570\u5b66A", "PUBLIC_REQUIRED", 4, teacherId, subjectId, 1, 3, 4, "A203");
 
         ensureDemoCourse("大学英语综合训练", "PUBLIC_REQUIRED", 2, teacherId, subjectId, 1, 1, 2, "A101");
         ensureDemoCourse("数据结构", "MAJOR_REQUIRED", 3, teacherId, subjectId, 2, 3, 4, "B203");
@@ -155,6 +203,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
 
     private void ensureDemoCourse(String title, String courseType, double credit, int teacherId, int subjectId,
                                   int dayOfWeek, int sectionStart, int sectionEnd, String location) {
+        int assignedTeacherId = resolveDemoTeacherForCourse(courseType, location, teacherId);
         Integer courseId = jdbcTemplate.query(
                 "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
                 rs -> rs.next() ? rs.getInt(1) : null,
@@ -166,7 +215,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                             + "major_name, cover, description, buy_count, view_count, sort, enable, status, remarks) "
                             + "VALUES (?, ?, ?, 0, 32, ?, ?, '计算机科学与技术', '/api/pub/image/default-course.png', "
                             + "?, 0, 0, 0, 1, 1, '')",
-                    teacherId, subjectId, title, credit, courseType,
+                    assignedTeacherId, subjectId, title, credit, courseType,
                     "智能课程管理系统演示课程：" + title
             );
             courseId = jdbcTemplate.query(
@@ -184,6 +233,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         if (courseId == null) {
             return;
         }
+        jdbcTemplate.update("UPDATE edu_course SET teacher_id = ? WHERE id = ?", assignedTeacherId, courseId);
         Integer scheduleCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM edu_course_schedule WHERE course_id = ?",
                 Integer.class,
@@ -196,6 +246,19 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                     courseId, dayOfWeek, sectionStart, sectionEnd, location
             );
         }
+    }
+
+    private int resolveDemoTeacherForCourse(String courseType, String location, int fallbackTeacherId) {
+        if ("A203".equals(location)) {
+            return fallbackTeacherId;
+        }
+        if ("PUBLIC_REQUIRED".equals(courseType) || "GENERAL_ELECTIVE".equals(courseType)) {
+            return getTeacherIdByMobile("13800138004", fallbackTeacherId);
+        }
+        if ("MAJOR_ELECTIVE".equals(courseType) || (location != null && location.startsWith("C"))) {
+            return getTeacherIdByMobile("13800138003", fallbackTeacherId);
+        }
+        return getTeacherIdByMobile("13800138002", fallbackTeacherId);
     }
 
     private void seedDemoDataIfNeeded() {

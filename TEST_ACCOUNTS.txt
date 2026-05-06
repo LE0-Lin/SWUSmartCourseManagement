@@ -16,6 +16,22 @@ Username: 13800138001
 Password: 123456
 Note: teacher login uses mobile number.
 
+Teacher system - demo course owners
+URL: http://localhost:9529
+Username: 13800138002
+Password: 123456
+Note: computer science required courses.
+
+URL: http://localhost:9529
+Username: 13800138003
+Password: 123456
+Note: AI and data elective courses.
+
+URL: http://localhost:9529
+Username: 13800138004
+Password: 123456
+Note: public required and general elective courses.
+
 Student system
 URL: http://localhost:9530
 Username: 13800138000

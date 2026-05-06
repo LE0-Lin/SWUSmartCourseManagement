@@ -253,6 +253,9 @@ CREATE TABLE `edu_teacher` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 INSERT INTO `edu_teacher` VALUES (1,'13800138001','teacher@example.com','123456','teacher','Default demo teacher account','/api/pub/image/default-teacher.png','',80,0,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (2,'13800138002','teacher_cs@example.com','123456','teacher_cs','Computer science demo teacher','/api/pub/image/default-teacher.png','',80,10,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (3,'13800138003','teacher_ai@example.com','123456','teacher_ai','AI elective demo teacher','/api/pub/image/default-teacher.png','',80,20,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
+INSERT INTO `edu_teacher` VALUES (4,'13800138004','teacher_public@example.com','123456','teacher_public','Public elective demo teacher','/api/pub/image/default-teacher.png','',80,30,1,0,'2022-02-20 18:26:37','2021-01-18 19:40:03');
 
 --
 -- Table structure for table `edu_video`

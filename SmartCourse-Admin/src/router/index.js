@@ -145,7 +145,7 @@ export const constantRoutes = [
       {
         path: 'graduation',
         name: 'SmartGraduation',
-        component: () => import('@/views/smart/graduation'),
+        component: () => import('@/views/smart/graduation.vue'),
         meta: { title: '毕业预警', icon: 'el-icon-magic-stick' }
       }
     ]

@@ -94,7 +94,7 @@ export default new Router({
           path: '/user/advisor',
           name: 'SmartAdvisor',
           meta: { title: 'Smart Advisor' },
-          component: () => import('@/views/advisor/index')
+          component: () => import('@/views/advisor/index.vue')
         }
       ]
     },
