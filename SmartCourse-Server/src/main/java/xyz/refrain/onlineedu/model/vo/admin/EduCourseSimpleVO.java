@@ -58,6 +58,12 @@ public class EduCourseSimpleVO implements Serializable, BeanConvert {
 	@ApiModelProperty(value = "总课时")
 	private Integer lessonNum;
 
+	@ApiModelProperty(value = "平时成绩占比")
+	private Integer usualScoreWeight;
+
+	@ApiModelProperty(value = "考试成绩占比")
+	private Integer examScoreWeight;
+
 	@ApiModelProperty(value = "课程封面图片路径")
 	private String cover;
 

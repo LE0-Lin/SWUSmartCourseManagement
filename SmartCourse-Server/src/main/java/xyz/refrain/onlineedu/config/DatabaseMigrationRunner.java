@@ -25,6 +25,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         ensureStudentNumberLoginColumn();
         ensureCourseSelectionIndexes();
         ensureCourseAdvisorColumns();
+        ensureGradeCompositionColumns();
         seedCourseAdvisorData();
         seedDefaultTeacherIfNeeded();
         seedDemoTeachersIfNeeded();
@@ -57,6 +58,8 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                 + "`course_id` int unsigned NOT NULL,"
                 + "`member_id` int unsigned NOT NULL,"
                 + "`score` double DEFAULT NULL,"
+                + "`usual_score` double DEFAULT NULL,"
+                + "`exam_score` double DEFAULT NULL,"
                 + "`update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
                 + "`create_time` datetime DEFAULT CURRENT_TIMESTAMP,"
                 + "PRIMARY KEY (`id`),"
@@ -131,6 +134,19 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                 "ALTER TABLE `edu_course` ADD COLUMN `course_type` varchar(32) NOT NULL DEFAULT 'MAJOR_ELECTIVE' AFTER `credit`");
         addColumnIfMissing("edu_course", "major_name",
                 "ALTER TABLE `edu_course` ADD COLUMN `major_name` varchar(64) NOT NULL DEFAULT '计算机科学与技术' AFTER `course_type`");
+    }
+
+    private void ensureGradeCompositionColumns() {
+        addColumnIfMissing("edu_course", "usual_score_weight",
+                "ALTER TABLE `edu_course` ADD COLUMN `usual_score_weight` int NOT NULL DEFAULT 30 AFTER `lesson_num`");
+        addColumnIfMissing("edu_course", "exam_score_weight",
+                "ALTER TABLE `edu_course` ADD COLUMN `exam_score_weight` int NOT NULL DEFAULT 70 AFTER `usual_score_weight`");
+        addColumnIfMissing("edu_grade", "usual_score",
+                "ALTER TABLE `edu_grade` ADD COLUMN `usual_score` double DEFAULT NULL AFTER `score`");
+        addColumnIfMissing("edu_grade", "exam_score",
+                "ALTER TABLE `edu_grade` ADD COLUMN `exam_score` double DEFAULT NULL AFTER `usual_score`");
+        jdbcTemplate.update("UPDATE edu_course SET usual_score_weight = 30 WHERE usual_score_weight IS NULL OR usual_score_weight = 0");
+        jdbcTemplate.update("UPDATE edu_course SET exam_score_weight = 70 WHERE exam_score_weight IS NULL OR exam_score_weight = 0");
     }
 
     private void addColumnIfMissing(String tableName, String columnName, String alterSql) {

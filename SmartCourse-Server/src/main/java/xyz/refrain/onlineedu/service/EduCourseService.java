@@ -167,6 +167,7 @@ public class EduCourseService {
 		}
 		// 转换数据
 		EduCourseEntity entity = vo.convertTo(new EduCourseEntity());
+		normalizeGradeWeights(entity);
 		entity.setBuyCount(0)
 				.setViewCount(0);
 		// 执行插入
@@ -192,6 +193,11 @@ public class EduCourseService {
 		Double price = vo.getPrice();
 		String description = vo.getDescription();
 		Integer sort = vo.getSort();
+		Integer usualScoreWeight = normalizeWeight(vo.getUsualScoreWeight(), 30);
+		Integer examScoreWeight = normalizeWeight(vo.getExamScoreWeight(), 70);
+		if (usualScoreWeight + examScoreWeight != 100) {
+			return RUtils.fail("平时成绩占比与考试成绩占比之和必须为100%");
+		}
 		// 更新
 		int i = eduCourseMapper.update(null,
 				Wrappers.lambdaUpdate(EduCourseEntity.class)
@@ -202,6 +208,8 @@ public class EduCourseService {
 						.set(Objects.nonNull(subjectId), EduCourseEntity::getSubjectId, subjectId)
 						.set(Objects.nonNull(price), EduCourseEntity::getPrice, price)
 						.set(Objects.nonNull(sort), EduCourseEntity::getSort, sort)
+						.set(EduCourseEntity::getUsualScoreWeight, usualScoreWeight)
+						.set(EduCourseEntity::getExamScoreWeight, examScoreWeight)
 		);
 		return RUtils.commonFailOrNot(i, "更新课程");
 	}
@@ -445,7 +453,8 @@ public class EduCourseService {
 	public List<Map<String, Object>> listTeacherCourseIdAndTitle(int teacherId) {
 		List<EduCourseEntity> entityList = eduCourseMapper.selectList(
 				Wrappers.lambdaQuery(EduCourseEntity.class)
-						.select(EduCourseEntity::getId, EduCourseEntity::getTitle)
+						.select(EduCourseEntity::getId, EduCourseEntity::getTitle,
+								EduCourseEntity::getUsualScoreWeight, EduCourseEntity::getExamScoreWeight)
 						.eq(EduCourseEntity::getTeacherId, teacherId)
 		);
 		return entityList.stream()
@@ -454,9 +463,29 @@ public class EduCourseService {
 					HashMap<String, Object> map = new HashMap<>();
 					map.put("id", e.getId());
 					map.put("title", e.getTitle());
+					map.put("usualScoreWeight", normalizeWeight(e.getUsualScoreWeight(), 30));
+					map.put("examScoreWeight", normalizeWeight(e.getExamScoreWeight(), 70));
 					return map;
 				})
 				.collect(Collectors.toList());
+	}
+
+	private void normalizeGradeWeights(EduCourseEntity entity) {
+		Integer usual = normalizeWeight(entity.getUsualScoreWeight(), 30);
+		Integer exam = normalizeWeight(entity.getExamScoreWeight(), 70);
+		if (usual + exam != 100) {
+			usual = 30;
+			exam = 70;
+		}
+		entity.setUsualScoreWeight(usual);
+		entity.setExamScoreWeight(exam);
+	}
+
+	private Integer normalizeWeight(Integer value, int defaultValue) {
+		if (value == null) {
+			return defaultValue;
+		}
+		return Math.max(0, Math.min(100, value));
 	}
 
 	/**

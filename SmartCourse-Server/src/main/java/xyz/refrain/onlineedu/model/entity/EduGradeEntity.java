@@ -43,6 +43,14 @@ public class EduGradeEntity implements Serializable {
     @TableField("score")
     private Double score;
 
+    @ApiModelProperty(value = "平时分")
+    @TableField("usual_score")
+    private Double usualScore;
+
+    @ApiModelProperty(value = "考试分")
+    @TableField("exam_score")
+    private Double examScore;
+
     @ApiModelProperty(value = "更新时间")
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;

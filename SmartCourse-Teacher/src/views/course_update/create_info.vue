@@ -41,7 +41,16 @@
         </el-form-item>
       </el-form>
 
-      <el-form :model="data" size="small" label-width="100px">
+      <el-form :model="data" :inline="true" size="small" label-width="120px">
+        <el-form-item label="成绩占比：">
+          <el-input-number v-model="data.usualScoreWeight" :min="0" :max="100" :step="5" style="width: 120px" @change="syncExamWeight" />
+          <span style="margin: 0 16px 0 8px">平时分%</span>
+          <el-input-number v-model="data.examScoreWeight" :min="0" :max="100" :step="5" style="width: 120px" @change="syncUsualWeight" />
+          <span style="margin-left: 8px">考试分%</span>
+        </el-form-item>
+      </el-form>
+
+      <el-form v-if="false" :model="data" size="small" label-width="100px">
         <el-form-item label="成绩占比设置：">
           <el-form :model="data.gradeRatio" size="small" label-width="80px">
             <el-form-item label="平时分：" prop="gradeRatio.usual">
@@ -205,6 +214,8 @@ export default {
         description: '',
         credit: 0,
         subjectId: null,
+        usualScoreWeight: 30,
+        examScoreWeight: 70,
         gradeRatio: {
           usual: 30,
           experiment: 0,
@@ -308,6 +319,12 @@ export default {
       if (!!arr || arr.length > 0) {
         this.data.subjectId = arr[arr.length - 1]
       }
+    },
+    syncExamWeight(value) {
+      this.data.examScoreWeight = 100 - Number(value || 0)
+    },
+    syncUsualWeight(value) {
+      this.data.usualScoreWeight = 100 - Number(value || 0)
     },
     handleDepartmentChange(department) {
       this.data.major = ''

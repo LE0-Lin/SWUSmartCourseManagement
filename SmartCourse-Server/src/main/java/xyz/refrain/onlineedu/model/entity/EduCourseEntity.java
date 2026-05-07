@@ -52,6 +52,14 @@ public class EduCourseEntity implements Serializable {
 	@TableField("lesson_num")
 	private Integer lessonNum;
 
+	@ApiModelProperty(value = "平时成绩占比")
+	@TableField("usual_score_weight")
+	private Integer usualScoreWeight;
+
+	@ApiModelProperty(value = "考试成绩占比")
+	@TableField("exam_score_weight")
+	private Integer examScoreWeight;
+
 	@ApiModelProperty(value = "课程封面图片路径")
 	@TableField("cover")
 	private String cover;

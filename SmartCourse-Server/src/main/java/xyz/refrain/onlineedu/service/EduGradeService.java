@@ -72,6 +72,13 @@ public class EduGradeService {
         );
         Map<Integer, EduGradeEntity> gradeMap = gradeEntities.stream()
                 .collect(Collectors.toMap(EduGradeEntity::getMemberId, e -> e, (left, right) -> right));
+        EduCourseEntity course = eduCourseMapper.selectOne(
+                Wrappers.lambdaQuery(EduCourseEntity.class)
+                        .select(EduCourseEntity::getId, EduCourseEntity::getUsualScoreWeight, EduCourseEntity::getExamScoreWeight)
+                        .eq(EduCourseEntity::getId, courseId)
+        );
+        int usualWeight = normalizeWeight(Objects.nonNull(course) ? course.getUsualScoreWeight() : null, 30);
+        int examWeight = normalizeWeight(Objects.nonNull(course) ? course.getExamScoreWeight() : null, 70);
         List<Map<String, Object>> result = members.stream().map(item -> {
             UctrMemberEntity member = memberMap.get(item.getMemberId());
             EduGradeEntity grade = gradeMap.get(item.getMemberId());
@@ -82,6 +89,10 @@ public class EduGradeService {
             row.put("email", Objects.nonNull(member) ? member.getEmail() : "");
             row.put("avatar", Objects.nonNull(member) ? member.getAvatar() : "");
             row.put("score", Objects.nonNull(grade) ? grade.getScore() : null);
+            row.put("usualScore", Objects.nonNull(grade) ? grade.getUsualScore() : null);
+            row.put("examScore", Objects.nonNull(grade) ? grade.getExamScore() : null);
+            row.put("usualScoreWeight", usualWeight);
+            row.put("examScoreWeight", examWeight);
             row.put("updateTime", Objects.nonNull(grade) ? grade.getUpdateTime() : item.getUpdateTime());
             return row;
         }).collect(Collectors.toList());
@@ -104,6 +115,14 @@ public class EduGradeService {
      * 保存或更新成绩
      */
     public R saveOrUpdateGrade(EduGradeEntity entity) {
+        EduCourseEntity course = eduCourseMapper.selectOne(
+                Wrappers.lambdaQuery(EduCourseEntity.class)
+                        .select(EduCourseEntity::getId, EduCourseEntity::getUsualScoreWeight, EduCourseEntity::getExamScoreWeight)
+                        .eq(EduCourseEntity::getId, entity.getCourseId())
+        );
+        int usualWeight = normalizeWeight(Objects.nonNull(course) ? course.getUsualScoreWeight() : null, 30);
+        int examWeight = normalizeWeight(Objects.nonNull(course) ? course.getExamScoreWeight() : null, 70);
+        entity.setScore(calculateTotalScore(entity.getUsualScore(), entity.getExamScore(), usualWeight, examWeight));
         EduGradeEntity exist = eduGradeMapper.selectOne(
                 Wrappers.lambdaQuery(EduGradeEntity.class)
                         .eq(EduGradeEntity::getCourseId, entity.getCourseId())
@@ -119,6 +138,22 @@ public class EduGradeService {
         return RUtils.commonFailOrNot(i, "保存成绩");
     }
 
+    private Double calculateTotalScore(Double usualScore, Double examScore, int usualWeight, int examWeight) {
+        if (usualScore == null && examScore == null) {
+            return null;
+        }
+        double usual = usualScore == null ? 0 : usualScore;
+        double exam = examScore == null ? 0 : examScore;
+        return Math.round((usual * usualWeight + exam * examWeight) / 100.0 * 100.0) / 100.0;
+    }
+
+    private int normalizeWeight(Integer value, int defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        return Math.max(0, Math.min(100, value));
+    }
+
     /**
      * 获取成绩分布统计
      */
@@ -130,6 +165,9 @@ public class EduGradeService {
         
         int[] distribution = new int[5]; // <60, 60-70, 70-80, 80-90, 90-100
         for (EduGradeEntity g : grades) {
+            if (g.getScore() == null) {
+                continue;
+            }
             double score = g.getScore();
             if (score < 60) distribution[0]++;
             else if (score < 70) distribution[1]++;
