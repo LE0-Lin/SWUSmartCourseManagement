@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import xyz.refrain.onlineedu.constant.CacheKeyPrefix;
+import xyz.refrain.onlineedu.utils.RedisUtils;
 
 @Component
 @Slf4j
@@ -29,6 +31,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         seedAdvisorDemoCoursesIfNeeded();
         seedProfessionalDemoDataIfNeeded();
         seedDemoDataIfNeeded();
+        clearSubjectCache();
     }
 
     private void createScheduleTable() {
@@ -307,14 +310,16 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
     }
 
     private void seedProfessionalDemoDataIfNeeded() {
-        int computerSubjectId = ensureSubject("计算机科学与技术", 0, 10);
-        int foundationSubjectId = ensureSubject("专业基础课", computerSubjectId, 11);
-        int coreSubjectId = ensureSubject("专业核心课", computerSubjectId, 12);
-        int electiveSubjectId = ensureSubject("智能技术方向", computerSubjectId, 13);
-        int practiceSubjectId = ensureSubject("实践创新课", computerSubjectId, 14);
-        int publicSubjectId = ensureSubject("公共通识课", 0, 20);
+        normalizeLegacySubjects();
+        ensureSubject("计算机科学与技术", 0, 1);
+        int publicRequiredSubjectId = ensureSubject("公共必修", 0, 10);
+        int foundationSubjectId = ensureSubject("专业基础", 0, 20);
+        int coreSubjectId = ensureSubject("专业核心", 0, 30);
+        int electiveSubjectId = ensureSubject("方向选修", 0, 40);
+        int practiceSubjectId = ensureSubject("实践创新", 0, 50);
+        int generalSubjectId = ensureSubject("通识选修", 0, 60);
 
-        ensureProfessionalCourse("高等数学A", "PUBLIC_REQUIRED", 4, "13800138001", publicSubjectId,
+        ensureProfessionalCourse("高等数学A", "PUBLIC_REQUIRED", 4, "13800138001", publicRequiredSubjectId,
                 1, 3, 4, "A203", 1, 78, 260, "面向计算机专业的数学基础课程，支撑算法分析、建模与后续专业学习。");
         ensureProfessionalCourse("程序设计基础", "MAJOR_REQUIRED", 4, "13800138002", foundationSubjectId,
                 1, 5, 6, "B101", 2, 92, 430, "以 C/Java 编程训练为主，建立计算思维、代码规范与调试能力。");
@@ -338,9 +343,9 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                 5, 3, 4, "C302", 11, 76, 420, "训练数据清洗、图表表达、可视分析和交互设计能力。");
         ensureProfessionalCourse("网络安全基础", "MAJOR_ELECTIVE", 2, "13800138004", electiveSubjectId,
                 5, 5, 6, "D401", 12, 69, 350, "覆盖密码学基础、Web 安全、攻防意识和安全开发规范。");
-        ensureProfessionalCourse("创新创业基础", "GENERAL_ELECTIVE", 2, "13800138004", publicSubjectId,
+        ensureProfessionalCourse("创新创业基础", "GENERAL_ELECTIVE", 2, "13800138004", generalSubjectId,
                 2, 7, 8, "D105", 1, 54, 260, "面向工程项目的创新思维、团队协作与产品意识训练。");
-        ensureProfessionalCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, "13800138004", publicSubjectId,
+        ensureProfessionalCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, "13800138004", generalSubjectId,
                 5, 7, 8, "D201", 2, 61, 280, "帮助学生建立健康学习节奏、压力管理与人际沟通能力。");
         ensureProfessionalCourse("毕业设计智能选题实践", "MAJOR_ELECTIVE", 2, "13800138003", practiceSubjectId,
                 6, 3, 4, "LAB-AI", 12, 43, 260, "围绕真实课题进行选题推荐、过程管理和成果归档演示。");
@@ -348,6 +353,18 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         seedComputerScienceStudents();
         seedComputerScienceSelectionsAndGrades();
         tuneDemoRiskProfiles();
+    }
+
+    private void normalizeLegacySubjects() {
+        jdbcTemplate.update("UPDATE edu_subject SET title = '计算机科学与技术', sort = 1, enable = 1 WHERE title = 'CS'");
+    }
+
+    private void clearSubjectCache() {
+        try {
+            RedisUtils.del(CacheKeyPrefix.CACHE_SUBJECT);
+        } catch (Exception ex) {
+            log.warn("Skip subject cache clear: {}", ex.getMessage());
+        }
     }
 
     private int ensureSubject(String title, int parentId, int sort) {

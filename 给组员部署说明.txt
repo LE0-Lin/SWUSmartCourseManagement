@@ -1,0 +1,41 @@
+智能课程管理系统 - 发给组员的最简部署方式
+
+推荐方式：不要用 GitHub，直接发压缩包。
+
+你发给组员前：
+1. 先在自己电脑运行一次：
+   SmartCourse-Server 目录执行 mvn -q -DskipTests package
+2. 确认 SmartCourse-Server\target\online-edu-0.0.1-SNAPSHOT.jar 存在。
+3. 把整个 SmartCourse 文件夹压缩成 zip 发给组员。
+4. 可以不压缩 .git、各端 dist 目录；node_modules 可压缩也可不压缩。
+
+组员电脑需要提前安装：
+1. JDK 8 或 JDK 11，并配置 java 命令。
+2. Node.js 14/16，并配置 npm 命令。
+3. MySQL 5.7/8.0，知道 root 密码。
+
+组员启动步骤：
+1. 解压 SmartCourse.zip。
+2. 双击“一键启动系统.bat”。
+3. 首次运行选择导入数据库，输入 Y。
+4. 输入 MySQL root 密码。
+5. 等待三个前端窗口编译完成。
+
+访问地址：
+学生端：http://localhost:9530
+教师端：http://localhost:9529
+管理端：http://localhost:9528
+
+常用演示账号：
+管理员：admin / 123456
+教师：13800138002 / 123456
+学生：222023321102103 / 123456
+
+如果启动失败：
+1. 端口被占用：关闭 9096、9528、9529、9530 端口上的旧进程。
+2. 数据库失败：确认 MySQL 服务已启动，root 密码正确。
+3. 前端依赖安装慢：保持网络可用，脚本使用 npmmirror 镜像安装。
+4. Redis 报错：确认 Redis 目录存在；如果本机已有 Redis，也可以忽略内置 Redis 窗口。
+
+答辩建议：
+演示时优先使用自己电脑，不要临时换新电脑。组员电脑适合作为备份或联调。

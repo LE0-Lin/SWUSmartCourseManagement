@@ -224,6 +224,15 @@ CREATE TABLE `edu_subject` (
 ) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=COMPACT COMMENT='课程科目分类表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+INSERT INTO `edu_subject` (`id`, `title`, `parent_id`, `sort`, `enable`) VALUES
+(1, '计算机科学与技术', 0, 1, 1),
+(2, '公共必修', 0, 10, 1),
+(3, '专业基础', 0, 20, 1),
+(4, '专业核心', 0, 30, 1),
+(5, '方向选修', 0, 40, 1),
+(6, '实践创新', 0, 50, 1),
+(7, '通识选修', 0, 60, 1);
+
 --
 -- Table structure for table `edu_teacher`
 --
@@ -435,7 +444,7 @@ DROP TABLE IF EXISTS `uctr_member`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `uctr_member` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '会员id',
-  `mobile` char(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '手机号',
+  `mobile` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '学号/登录账号',
   `email` varchar(127) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '邮箱地址',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '密码',
   `nickname` varchar(31) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '昵称',

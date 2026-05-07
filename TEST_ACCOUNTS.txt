@@ -1,98 +1,67 @@
-SmartCourse Test Accounts
-=========================
+智能课程管理系统 - 最新测试账号表
+更新时间：2026-05-07
 
-Last verified: 2026-05-06
+一、访问地址
+管理端：http://localhost:9528
+教师端：http://localhost:9529
+学生端：http://localhost:9530
+后端接口：http://localhost:9096
 
-Main verified accounts
-----------------------
-Admin system
-URL: http://localhost:9528
-Username: admin
-Password: 123456
+二、管理员端
+账号：admin
+密码：123456
+用途：课程管理、教师管理、学生管理、毕业风险画像、全体学生预警统计。
 
-Teacher system
-URL: http://localhost:9529
-Username: 13800138001
-Password: 123456
-Note: teacher login uses mobile number.
+三、教师端
+说明：教师端现在统一使用下面 4 个演示教师账号，密码均为 123456。
+旧账号 13077590001 不是当前演示数据账号，可能已不在当前数据库种子内，所以不建议再用它演示。
 
-Teacher system - demo course owners
-URL: http://localhost:9529
-Username: 13800138002
-Password: 123456
-Note: computer science required courses.
+1. 默认公共课教师
+账号：13800138001
+密码：123456
+演示课程：高等数学A、大学英语等公共必修课。
 
-URL: http://localhost:9529
-Username: 13800138003
-Password: 123456
-Note: AI and data elective courses.
+2. 计算机专业基础/核心课教师
+账号：13800138002
+密码：123456
+演示课程：程序设计基础、离散数学、数据结构、计算机组成原理、操作系统。
 
-URL: http://localhost:9529
-Username: 13800138004
-Password: 123456
-Note: public required and general elective courses.
+3. 智能技术方向教师
+账号：13800138003
+密码：123456
+演示课程：计算机网络、数据库系统原理、人工智能导论、数据可视化、毕业设计智能选题实践。
 
-Student system
-URL: http://localhost:9530
-Username: 222023321102093
-Password: 123456
-Note: student login now uses student number.
+4. 实践与通识课程教师
+账号：13800138004
+密码：123456
+演示课程：软件工程、网络安全基础、创新创业基础、大学生心理健康。
 
-Student demo class accounts
----------------------------
-All use the Student system URL: http://localhost:9530
-Password for every account: 123456
+四、学生端
+说明：学生端统一使用学号登录，密码均为 123456。
 
-222023321102093
-222023321102094
-222023321102095
-222023321102096
-222023321102097
-222023321102098
-222023321102099
-222023321102100
-222023321102101
-222023321102102
-222023321102103
-222023321102104
-222023321102105
-222023321102106
-222023321102107
-222023321102108
+低风险学生：
+222023321102093 / 123456 / 张明
+222023321102094 / 123456 / 李思雨
+222023321102095 / 123456 / 王子涵
+222023321102096 / 123456 / 赵一鸣
+222023321102097 / 123456 / 陈嘉琪
 
-Current local database account also verified
---------------------------------------------
-Teacher system
-URL: http://localhost:9529
-Username: 18585922669
-Password: 123456
-Note: this account exists in the current local database, but it is not guaranteed after a fresh schema import.
+中风险学生：
+222023321102098 / 123456 / 刘浩然
+222023321102099 / 123456 / 周可欣
+222023321102100 / 123456 / 黄俊杰
+222023321102101 / 123456 / 吴雨桐
+222023321102102 / 123456 / 徐子墨
 
-Admin seed accounts in schema.sql
----------------------------------
-These accounts belong to the admin system account table acl_user.
-They use the Admin system URL: http://localhost:9528
+高风险学生：
+222023321102103 / 123456 / 孙若曦
+222023321102104 / 123456 / 胡嘉诚
+222023321102105 / 123456 / 林语晨
+222023321102106 / 123456 / 郭航
+222023321102107 / 123456 / 何清扬
+222023321102108 / 123456 / 马欣怡
 
-admin / 123456 / enabled
-teacher / 123456 / enabled
-student / 123456 / enabled
-tch3 / 123456 / enabled
-tch4 / 123456 / enabled
-tch5 / 123456 / disabled
-tch6 / 123456 / enabled
-tch7 / 123456 / disabled
-tch8 / 123456 / enabled
-tch9 / 123456 / enabled
-tch10 / 123456 / enabled
-tch11 / 123456 / enabled
-tch12 / 123456 / disabled
-tch13 / 123456 / enabled
-tch14 / 123456 / enabled
-tch15 / 123456 / disabled
-tch16 / 123456 / enabled
-
-Important notes
----------------
-1. Admin usernames are text usernames.
-2. Teacher and student frontends use mobile numbers as usernames.
-3. If login suddenly shows Network Error, check whether the backend is listening on http://localhost:9096.
+五、推荐答辩演示顺序
+1. 学生端登录 222023321102103，进入“智能毕业路径”，展示高风险、学分缺口、What-if 路径模拟、冲突课程红标和禁用态。
+2. 管理端登录 admin，进入“毕业预警/智能画像”，展示高/中/低风险学生分布和学生列表。
+3. 教师端分别登录 13800138002、13800138003，对比课程列表和我的课表，说明不同教师只能管理自己的课程。
