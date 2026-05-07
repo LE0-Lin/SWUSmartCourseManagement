@@ -1,12 +1,11 @@
-智能课程管理系统 - 发给组员的最简部署方式
+智能课程管理系统 - 最简部署方式
 
 推荐方式：不要用 GitHub，直接发压缩包。
 
-你发给组员前：
 1. 先在自己电脑运行一次：
    SmartCourse-Server 目录执行 mvn -q -DskipTests package
 2. 确认 SmartCourse-Server\target\online-edu-0.0.1-SNAPSHOT.jar 存在。
-3. 把整个 SmartCourse 文件夹压缩成 zip 发给组员。
+3. 把整个 SmartCourse 文件夹压缩成 zip 发。
 4. 可以不压缩 .git、各端 dist 目录；node_modules 可压缩也可不压缩。
 
 组员电脑需要提前安装：
@@ -16,7 +15,7 @@
 
 组员启动步骤：
 1. 解压 SmartCourse.zip。
-2. 双击“一键启动系统.bat”。
+2. 双击“一键启动系统.bat”。如果同学电脑打开中文文件名脚本异常，就双击英文版“start_smartcourse.bat”。
 3. 首次运行选择导入数据库，输入 Y。
 4. 输入 MySQL root 密码。
 5. 等待三个前端窗口编译完成。
