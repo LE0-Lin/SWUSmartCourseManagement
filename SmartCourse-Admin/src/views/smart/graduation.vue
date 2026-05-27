@@ -49,12 +49,12 @@
             <el-tag :type="riskType(row.riskLevel)" effect="dark">{{ riskText(row.riskLevel) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="完成度" width="180">
+        <el-table-column label="已通过完成度" width="180">
           <template slot-scope="{ row }">
             <el-progress :percentage="Number(row.completionRate || 0)" :stroke-width="8" />
           </template>
         </el-table-column>
-        <el-table-column prop="remainingCredits" label="预计缺口" width="100" />
+        <el-table-column prop="remainingCredits" label="预计分类缺口" width="120" />
         <el-table-column label="预警依据" min-width="280">
           <template slot-scope="{ row }">
             <div class="notes">

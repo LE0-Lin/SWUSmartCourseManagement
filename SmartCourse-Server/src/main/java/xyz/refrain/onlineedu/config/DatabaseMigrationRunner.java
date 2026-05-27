@@ -247,22 +247,22 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                 "SELECT id FROM edu_teacher WHERE mobile = '13800138001' OR name = 'teacher' ORDER BY id ASC LIMIT 1",
                 rs -> rs.next() ? rs.getInt(1) : null
         );
-        Integer subjectId = jdbcTemplate.query(
-                "SELECT id FROM edu_subject ORDER BY id ASC LIMIT 1",
-                rs -> rs.next() ? rs.getInt(1) : 1
-        );
+        int publicRequiredSubjectId = ensureSubject("公共必修", 0, 10);
+        int coreSubjectId = ensureSubject("专业核心", 0, 30);
+        int electiveSubjectId = ensureSubject("方向选修", 0, 40);
+        int generalSubjectId = ensureSubject("通识选修", 0, 60);
         if (teacherId == null) {
             return;
         }
-        ensureDemoCourse("\u9ad8\u7b49\u6570\u5b66A", "PUBLIC_REQUIRED", 4, teacherId, subjectId, 1, 3, 4, "A203");
+        ensureDemoCourse("\u9ad8\u7b49\u6570\u5b66A", "PUBLIC_REQUIRED", 4, teacherId, publicRequiredSubjectId, 1, 3, 4, "A203");
 
-        ensureDemoCourse("大学英语综合训练", "PUBLIC_REQUIRED", 2, teacherId, subjectId, 1, 1, 2, "A101");
-        ensureDemoCourse("数据结构", "MAJOR_REQUIRED", 3, teacherId, subjectId, 2, 3, 4, "B203");
-        ensureDemoCourse("操作系统", "MAJOR_REQUIRED", 3, teacherId, subjectId, 3, 1, 2, "B204");
-        ensureDemoCourse("人工智能导论", "MAJOR_ELECTIVE", 2, teacherId, subjectId, 4, 5, 6, "C301");
-        ensureDemoCourse("数据可视化", "MAJOR_ELECTIVE", 2, teacherId, subjectId, 5, 3, 4, "C302");
-        ensureDemoCourse("创新创业基础", "GENERAL_ELECTIVE", 2, teacherId, subjectId, 2, 7, 8, "D105");
-        ensureDemoCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, teacherId, subjectId, 5, 7, 8, "D201");
+        ensureDemoCourse("大学英语综合训练", "PUBLIC_REQUIRED", 2, teacherId, publicRequiredSubjectId, 1, 1, 2, "A101");
+        ensureDemoCourse("数据结构", "MAJOR_REQUIRED", 3, teacherId, coreSubjectId, 2, 3, 4, "B203");
+        ensureDemoCourse("操作系统", "MAJOR_REQUIRED", 3, teacherId, coreSubjectId, 3, 1, 2, "B204");
+        ensureDemoCourse("人工智能导论", "MAJOR_ELECTIVE", 2, teacherId, electiveSubjectId, 4, 5, 6, "C301");
+        ensureDemoCourse("数据可视化", "MAJOR_ELECTIVE", 2, teacherId, electiveSubjectId, 5, 3, 4, "C302");
+        ensureDemoCourse("创新创业基础", "GENERAL_ELECTIVE", 2, teacherId, generalSubjectId, 2, 7, 8, "D105");
+        ensureDemoCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, teacherId, generalSubjectId, 5, 7, 8, "D201");
     }
 
     private void ensureDemoCourse(String title, String courseType, double credit, int teacherId, int subjectId,
@@ -373,6 +373,10 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
 
     private void normalizeLegacySubjects() {
         jdbcTemplate.update("UPDATE edu_subject SET title = '计算机科学与技术', sort = 1, enable = 1 WHERE title = 'CS'");
+        jdbcTemplate.update("UPDATE edu_subject SET enable = 0 "
+                + "WHERE parent_id IN (SELECT id FROM (SELECT id FROM edu_subject WHERE title = '计算机科学与技术' AND parent_id = 0) legacy_parent) "
+                + "AND title IN ('专业基础课', '专业核心课', '智能技术方向', '实践创新课')");
+        jdbcTemplate.update("UPDATE edu_subject SET enable = 0 WHERE title = '公共通识课' AND parent_id = 0");
     }
 
     private void clearSubjectCache() {
@@ -517,28 +521,33 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         if (demoMembers.size() < 12) {
             return;
         }
-        java.util.List<Integer> publicRequired = courseIdsByType("PUBLIC_REQUIRED");
-        java.util.List<Integer> majorRequired = courseIdsByType("MAJOR_REQUIRED");
-        java.util.List<Integer> majorElective = courseIdsByType("MAJOR_ELECTIVE");
-        java.util.List<Integer> generalElective = courseIdsByType("GENERAL_ELECTIVE");
-        java.util.List<Integer> allCourses = new java.util.ArrayList<>();
-        allCourses.addAll(publicRequired);
-        allCourses.addAll(majorRequired);
-        allCourses.addAll(majorElective);
-        allCourses.addAll(generalElective);
+        java.util.List<Integer> publicRequired = courseIdsByTitles("高等数学A");
+        if (publicRequired.isEmpty()) {
+            publicRequired = courseIdsByType("PUBLIC_REQUIRED");
+        }
+        java.util.List<Integer> majorRequiredFull = courseIdsByTitles(
+                "程序设计基础", "离散数学", "数据结构", "计算机组成原理", "操作系统", "计算机网络");
+        java.util.List<Integer> majorRequiredPartial = courseIdsByTitles("程序设计基础", "离散数学");
+        java.util.List<Integer> majorElectiveFull = courseIdsByTitles("人工智能导论", "数据可视化", "网络安全基础");
+        java.util.List<Integer> majorElectivePartial = courseIdsByTitles("人工智能导论");
+        java.util.List<Integer> generalElectiveFull = courseIdsByTitles("创新创业基础", "大学生心理健康");
         for (int i = 0; i < demoMembers.size(); i++) {
             Integer memberId = demoMembers.get(i);
             jdbcTemplate.update("DELETE FROM edu_grade WHERE member_id = ?", memberId);
             jdbcTemplate.update("DELETE FROM rel_course_member WHERE member_id = ?", memberId);
             if (i < 5) {
-                enrollCourses(memberId, allCourses, 0, Math.min(12, allCourses.size()), true, 82 + i);
+                enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, 82 + i);
+                enrollCourses(memberId, majorRequiredFull, 0, majorRequiredFull.size(), true, 82 + i);
+                enrollCourses(memberId, majorElectiveFull, 0, majorElectiveFull.size(), true, 82 + i);
+                enrollCourses(memberId, generalElectiveFull, 0, generalElectiveFull.size(), true, 82 + i);
             } else if (i < 10) {
                 enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, 76 + i);
-                enrollCourses(memberId, majorRequired, 0, Math.min(6, majorRequired.size()), true, 72 + i);
-                enrollCourses(memberId, majorElective, 0, Math.min(1, majorElective.size()), true, 70 + i);
+                enrollCourses(memberId, majorRequiredFull, 0, majorRequiredFull.size(), true, 72 + i);
+                enrollCourses(memberId, majorElectivePartial, 0, majorElectivePartial.size(), true, 70 + i);
+                enrollCourses(memberId, generalElectiveFull, 0, generalElectiveFull.size(), true, 70 + i);
             } else {
                 enrollCourses(memberId, publicRequired, 0, Math.min(1, publicRequired.size()), i % 2 == 0, 55);
-                enrollCourses(memberId, majorRequired, 0, Math.min(2, majorRequired.size()), i % 3 == 0, 54);
+                enrollCourses(memberId, majorRequiredPartial, 0, majorRequiredPartial.size(), i % 3 == 0, 54);
             }
         }
     }
@@ -549,6 +558,17 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                 Integer.class,
                 courseType
         );
+    }
+
+    private java.util.List<Integer> courseIdsByTitles(String... titles) {
+        java.util.List<Integer> ids = new java.util.ArrayList<>();
+        for (String title : titles) {
+            Integer id = getCourseId(title);
+            if (id != null) {
+                ids.add(id);
+            }
+        }
+        return ids;
     }
 
     private void enrollCourses(Integer memberId, java.util.List<Integer> courseIds, int start, int end, boolean pass, int baseScore) {

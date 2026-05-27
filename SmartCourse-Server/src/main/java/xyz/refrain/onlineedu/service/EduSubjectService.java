@@ -145,11 +145,23 @@ public class EduSubjectService {
 			return null;
 		}
 		for (EduSubjectSimpleChildrenVO vo : voList) {
-			List<EduSubjectEntity> entityList = listAllChild(vo.getId());
+			List<EduSubjectEntity> entityList = listAllEnabledChild(vo.getId());
 			List<EduSubjectSimpleChildrenVO> subVOList = covertToSimpleListVO(entityList);
 			vo.setChildren(listSimpleByRecursively(subVOList));
 		}
 		return voList;
+	}
+
+	/**
+	 * 列举所有启用的子分类信息
+	 */
+	public List<EduSubjectEntity> listAllEnabledChild(int parentId) {
+		return eduSubjectMapper.selectList(
+				Wrappers.lambdaQuery(EduSubjectEntity.class)
+						.eq(EduSubjectEntity::getParentId, parentId)
+						.eq(EduSubjectEntity::getEnable, true)
+						.orderByAsc(EduSubjectEntity::getSort)
+		);
 	}
 
 	/**

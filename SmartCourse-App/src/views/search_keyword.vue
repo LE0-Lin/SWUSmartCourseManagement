@@ -67,7 +67,7 @@ export default {
       getCourses(this.searchParams).then(resp => {
         this.courseList = resp.data.list.filter(course => {
           // 首先过滤当前学期的课程
-          if (course.semester !== this.currentSemester) {
+          if (course.semester && course.semester !== this.currentSemester) {
             return false
           }
           // 公共课对所有学生可见
@@ -78,9 +78,9 @@ export default {
           if (course.courseType === 'major' && course.majors && course.majors.length > 0) {
             return this.user && this.user.major && course.majors.includes(this.user.major)
           }
-          return false
+          return true
         })
-        this.total = this.courseList.length
+        this.total = (resp.data && resp.data.total) || this.courseList.length
       })
     },
     search() {

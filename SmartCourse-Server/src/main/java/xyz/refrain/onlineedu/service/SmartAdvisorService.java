@@ -35,13 +35,19 @@ public class SmartAdvisorService {
         Map<String, Requirement> requirements = buildRequirements();
         Map<String, CreditBucket> buckets = summarizeCredits(requirements, selectedCourses);
         List<Map<String, Object>> recommendations = buildRecommendations(selectedCourses, selectedSchedules, buckets);
-        List<Map<String, Object>> pathPlan = buildPathPlan(recommendations, buckets);
+        List<Map<String, Object>> pathPlan = buildPathPlan(recommendations, buckets, selectedSchedules);
 
         double completedCredits = buckets.values().stream().mapToDouble(CreditBucket::getCompletedCredits).sum();
         double projectedCredits = buckets.values().stream().mapToDouble(CreditBucket::getProjectedCredits).sum();
         double requiredCredits = requirements.values().stream().mapToDouble(item -> item.requiredCredits).sum();
-        double completionRate = requiredCredits == 0 ? 0 : Math.min(100, completedCredits * 100 / requiredCredits);
-        double projectedRate = requiredCredits == 0 ? 0 : Math.min(100, projectedCredits * 100 / requiredCredits);
+        double fulfilledCompletedCredits = buckets.values().stream()
+                .mapToDouble(item -> Math.min(item.getCompletedCredits(), item.getRequiredCredits()))
+                .sum();
+        double fulfilledProjectedCredits = buckets.values().stream()
+                .mapToDouble(item -> Math.min(item.getProjectedCredits(), item.getRequiredCredits()))
+                .sum();
+        double completionRate = requiredCredits == 0 ? 0 : Math.min(100, fulfilledCompletedCredits * 100 / requiredCredits);
+        double projectedRate = requiredCredits == 0 ? 0 : Math.min(100, fulfilledProjectedCredits * 100 / requiredCredits);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("majorName", DEFAULT_MAJOR);
@@ -119,16 +125,16 @@ public class SmartAdvisorService {
         String label = bucket == null ? "选修" : bucket.getTypeLabel();
         double remaining = bucket == null ? 0 : bucket.getRemainingAfterCurrent();
         String reason = remaining > 0
-                ? "该课程可补充" + label + "学分缺口，且与当前课表不冲突。"
-                : "该课程与当前课表不冲突，可作为能力拓展课程。";
+                ? "该课程可补充" + label + "学分缺口，且与当前已选课表不冲突。若同时选择多门课，请以一键补齐方案为准，系统会继续排除推荐课程之间的冲突。"
+                : "该课程与当前已选课表不冲突，可作为能力拓展课程。若同时选择多门课，请以一键补齐方案为准，系统会继续排除推荐课程之间的冲突。";
         return RUtils.success("选课诊断", diagnosis(true, "OK", reason));
     }
 
     private Map<String, Object> buildSummary(double completedCredits, double projectedCredits, double requiredCredits,
                                              double completionRate, double projectedRate,
                                              Map<String, CreditBucket> buckets) {
-        double totalRemaining = Math.max(0, requiredCredits - completedCredits);
-        double projectedRemaining = Math.max(0, requiredCredits - projectedCredits);
+        double totalRemaining = buckets.values().stream().mapToDouble(CreditBucket::getRemainingCredits).sum();
+        double projectedRemaining = buckets.values().stream().mapToDouble(CreditBucket::getRemainingAfterCurrent).sum();
         boolean hasRequiredGap = buckets.values().stream()
                 .anyMatch(item -> item.getTypeCode().contains("REQUIRED") && item.getRemainingAfterCurrent() > 0);
         String riskLevel;
@@ -170,7 +176,11 @@ public class SmartAdvisorService {
         if (!pathPlan.isEmpty()) {
             Map<String, Object> note = new LinkedHashMap<>();
             note.put("level", "success");
-            note.put("text", "已生成一套本学期补齐路径，可作为 what-if 选课模拟方案。");
+            double remainingAfterPath = remainingAfterPathPlan(buckets, pathPlan);
+            note.put("text", remainingAfterPath <= 0
+                    ? "已生成一套本学期补齐路径，可作为 what-if 选课模拟方案。"
+                    : "已生成一套本学期候选补选路径，但仍可能剩余 " + formatCredit(remainingAfterPath)
+                    + " 学分缺口，需要继续关注无冲突课程。");
             notes.add(note);
         }
         if (notes.isEmpty()) {
@@ -180,6 +190,21 @@ public class SmartAdvisorService {
             notes.add(note);
         }
         return notes;
+    }
+
+    private double remainingAfterPathPlan(Map<String, CreditBucket> buckets, List<Map<String, Object>> pathPlan) {
+        Map<String, Double> missing = new HashMap<>();
+        for (CreditBucket bucket : buckets.values()) {
+            missing.put(bucket.getTypeCode(), bucket.getRemainingAfterCurrent());
+        }
+        for (Map<String, Object> course : pathPlan) {
+            String type = asString(course.get("courseType"), "MAJOR_ELECTIVE");
+            double need = missing.getOrDefault(type, 0.0);
+            if (need > 0) {
+                missing.put(type, Math.max(0, need - asDouble(course.get("credit"), 2)));
+            }
+        }
+        return missing.values().stream().mapToDouble(Double::doubleValue).sum();
     }
 
     private List<Map<String, Object>> buildRecommendations(List<Map<String, Object>> selectedCourses,
@@ -230,20 +255,27 @@ public class SmartAdvisorService {
                 ? "可补齐" + typeLabel + "缺口，预计贡献 " + formatCredit(credit) + " 学分"
                 : "当前学分缺口不明显，可作为能力拓展课程";
         if (conflict == null) {
-            return base + "，且与当前课表不冲突。";
+            return base + "，且与当前已选课表不冲突。";
         }
         return base + "，但与《" + conflict.get("selectedTitle") + "》冲突，暂不建议本轮选择。";
     }
 
     private List<Map<String, Object>> buildPathPlan(List<Map<String, Object>> recommendations,
-                                                    Map<String, CreditBucket> buckets) {
+                                                    Map<String, CreditBucket> buckets,
+                                                    List<Map<String, Object>> selectedSchedules) {
         Map<String, Double> missing = new HashMap<>();
         for (CreditBucket bucket : buckets.values()) {
             missing.put(bucket.getTypeCode(), bucket.getRemainingAfterCurrent());
         }
         List<Map<String, Object>> path = new ArrayList<>();
+        List<Map<String, Object>> plannedSchedules = new ArrayList<>(selectedSchedules);
         for (Map<String, Object> course : recommendations) {
             if (!Boolean.TRUE.equals(course.get("selectable"))) {
+                continue;
+            }
+            int courseId = asInt(course.get("courseId"));
+            List<Map<String, Object>> targetSchedules = querySchedulesForCourses(new LinkedHashSet<>(Collections.singletonList(courseId)));
+            if (findFirstConflict(plannedSchedules, targetSchedules) != null) {
                 continue;
             }
             String type = asString(course.get("courseType"), "MAJOR_ELECTIVE");
@@ -255,6 +287,7 @@ public class SmartAdvisorService {
             Map<String, Object> step = new LinkedHashMap<>(course);
             step.put("afterSelectGap", Math.max(0, need - credit));
             path.add(step);
+            plannedSchedules.addAll(targetSchedules);
             missing.put(type, need - credit);
             boolean stillMissing = missing.values().stream().anyMatch(value -> value > 0);
             if (!stillMissing || path.size() >= 4) {
