@@ -13,6 +13,10 @@
                 &nbsp;|&nbsp;
                 <span class="tch">{{ course.teacherName }}</span>
               </div>
+              <div class="curriculum">
+                <span v-if="course.curriculumSemester">建议第{{ course.curriculumSemester }}学期开设</span>
+                <span v-if="course.assessmentMethod"> · {{ course.assessmentMethod }}</span>
+              </div>
               <div class="bottom">
                 <span class="sub-num">共{{ course.buyCount }}人选修</span>
               </div>
@@ -78,6 +82,13 @@ export default {
       color: #999;
       font-size: 12px;
       margin: 3px 0;
+    }
+
+    .curriculum {
+      min-height: 17px;
+      color: #7f8c8d;
+      font-size: 12px;
+      line-height: 17px;
     }
 
     .bottom {

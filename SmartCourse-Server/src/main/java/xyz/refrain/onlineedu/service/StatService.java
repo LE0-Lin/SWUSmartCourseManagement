@@ -120,6 +120,7 @@ public class StatService {
 				Wrappers.lambdaQuery(EduCourseEntity.class)
 						.select(EduCourseEntity::getId)
 						.eq(EduCourseEntity::getTeacherId, teacherId)
+						.eq(EduCourseEntity::getEnable, true)
 						.eq(EduCourseEntity::getStatus, CourseStatusEnum.PUBLISH)
 		).stream().parallel().map(EduCourseEntity::getId).collect(Collectors.toSet());
 		vo.setCourseCount(courseIdSet.size());

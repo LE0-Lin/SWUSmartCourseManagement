@@ -1,0 +1,596 @@
+:root {
+  color-scheme: dark;
+  --ink: #f8fbff;
+  --muted: rgba(232, 240, 246, 0.72);
+  --faint: rgba(222, 237, 246, 0.48);
+  --line: rgba(228, 242, 249, 0.22);
+  --panel: rgba(4, 24, 37, 0.62);
+  --panel-strong: rgba(3, 20, 31, 0.86);
+  --cyan: #76d4dc;
+  --teal: #2e9eaa;
+  --gold: #d8b678;
+  --green: #78c89b;
+  --blue: #74a9e5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+  background: #061522;
+  color: var(--ink);
+}
+
+body {
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+}
+
+.portal-shell {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.campus-gallery,
+.campus-slide,
+.atmosphere,
+.grid-lines {
+  position: absolute;
+  inset: 0;
+}
+
+.campus-gallery {
+  z-index: -4;
+  background: #071a29;
+}
+
+.campus-slide {
+  background-position: center;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(1.035);
+  transition: opacity 1.2s ease, transform 7s ease;
+}
+
+.campus-slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.atmosphere {
+  z-index: -3;
+  background:
+    linear-gradient(90deg, rgba(2, 17, 27, 0.97) 0%, rgba(3, 21, 32, 0.8) 38%, rgba(3, 19, 31, 0.28) 70%, rgba(3, 18, 28, 0.64) 100%),
+    linear-gradient(180deg, rgba(3, 18, 29, 0.5) 0%, rgba(3, 18, 29, 0.1) 42%, rgba(3, 18, 29, 0.93) 100%);
+}
+
+.grid-lines {
+  z-index: -2;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(154, 218, 226, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(154, 218, 226, 0.16) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: linear-gradient(90deg, black, transparent 84%);
+}
+
+.topbar,
+.hero-content,
+.access-zone,
+.portal-footer {
+  width: min(1600px, calc(100% - 96px));
+  margin-inline: auto;
+}
+
+.topbar {
+  display: flex;
+  min-height: 92px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+
+.school-brand,
+.topbar-meta,
+.system-state,
+.feature-line,
+.role-footer,
+.portal-footer,
+.footer-intro,
+.data-strip {
+  display: flex;
+  align-items: center;
+}
+
+.school-brand img {
+  width: 184px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.brand-divider,
+.meta-divider {
+  width: 1px;
+  background: var(--line);
+}
+
+.brand-divider {
+  height: 34px;
+  margin: 0 18px;
+}
+
+.brand-system {
+  color: rgba(245, 250, 252, 0.8);
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+.topbar-meta {
+  color: rgba(244, 249, 252, 0.76);
+  font-size: 13px;
+  gap: 20px;
+}
+
+.system-state {
+  gap: 8px;
+}
+
+.pulse,
+.endpoint-state b {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 5px rgba(120, 200, 155, 0.12);
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.meta-divider {
+  height: 18px;
+}
+
+#current-time {
+  min-width: 48px;
+  color: #fff;
+  font-family: Consolas, monospace;
+  font-size: 15px;
+}
+
+.hero-content {
+  flex: 1 0 auto;
+  padding-top: clamp(52px, 8vh, 112px);
+}
+
+.hero-copy {
+  max-width: 850px;
+}
+
+.eyebrow,
+.section-kicker,
+.role-en {
+  margin: 0;
+  color: var(--cyan);
+  font-family: Consolas, "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.hero-copy h1 {
+  display: flex;
+  margin: 24px 0 18px;
+  flex-direction: column;
+  font-size: clamp(48px, 6.2vw, 96px);
+  font-weight: 300;
+  line-height: 1.03;
+  letter-spacing: 0;
+}
+
+.hero-copy h1 strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.hero-summary {
+  margin: 0;
+  color: rgba(246, 251, 253, 0.84);
+  font-size: 19px;
+  line-height: 1.8;
+}
+
+.feature-line {
+  margin-top: 38px;
+  color: rgba(237, 246, 249, 0.72);
+  font-size: 14px;
+  gap: 0;
+}
+
+.feature-line span {
+  position: relative;
+  padding-right: 24px;
+}
+
+.feature-line span + span {
+  padding-left: 24px;
+}
+
+.feature-line span + span::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gold);
+  content: "";
+}
+
+.access-zone {
+  padding: 32px 0 28px;
+}
+
+.access-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.access-heading h2 {
+  margin: 6px 0 0;
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.gallery-dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gallery-dot {
+  width: 28px;
+  height: 3px;
+  padding: 0;
+  border: 0;
+  background: rgba(244, 249, 252, 0.42);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.gallery-dot.is-active {
+  width: 48px;
+  background: var(--cyan);
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.role-card {
+  position: relative;
+  display: flex;
+  min-height: 190px;
+  padding: 20px 22px;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.role-card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--role-accent);
+  content: "";
+}
+
+.role-card:hover {
+  border-color: rgba(255, 255, 255, 0.56);
+  background: var(--panel-strong);
+  transform: translateY(-7px);
+}
+
+.student-card {
+  --role-accent: var(--cyan);
+}
+
+.teacher-card {
+  --role-accent: var(--gold);
+}
+
+.admin-card {
+  --role-accent: var(--blue);
+}
+
+.role-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: var(--role-accent);
+}
+
+.role-icon svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 1.6;
+}
+
+.role-number {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  color: rgba(237, 247, 250, 0.14);
+  font-family: Consolas, monospace;
+  font-size: 34px;
+}
+
+.role-main {
+  margin-top: 18px;
+}
+
+.role-main h3 {
+  margin: 6px 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.role-main p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.role-footer {
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(229, 242, 248, 0.14);
+}
+
+.endpoint-state {
+  display: flex;
+  align-items: center;
+  color: var(--faint);
+  font-size: 12px;
+  gap: 9px;
+}
+
+.endpoint-state.is-offline b {
+  background: #d78972;
+  box-shadow: 0 0 0 5px rgba(215, 137, 114, 0.12);
+}
+
+.enter-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgba(232, 244, 249, 0.26);
+  border-radius: 50%;
+  color: rgba(248, 252, 253, 0.86);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.role-card:hover .enter-icon {
+  background: #f6fbfc;
+  color: #082334;
+}
+
+.enter-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.portal-footer {
+  min-height: 64px;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  color: rgba(229, 239, 244, 0.66);
+  font-size: 12px;
+}
+
+.footer-intro,
+.data-strip {
+  gap: 16px;
+}
+
+.footer-mark {
+  color: var(--cyan);
+  font-family: Consolas, monospace;
+  font-weight: 700;
+}
+
+.data-strip span {
+  white-space: nowrap;
+}
+
+.data-strip b {
+  margin-right: 4px;
+  color: #fff;
+  font-family: Consolas, monospace;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.48;
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar,
+  .hero-content,
+  .access-zone,
+  .portal-footer {
+    width: min(100% - 40px, 760px);
+  }
+
+  .topbar {
+    min-height: 78px;
+  }
+
+  .brand-system,
+  .meta-divider {
+    display: none;
+  }
+
+  .school-brand img {
+    width: 156px;
+  }
+
+  .hero-content {
+    padding-top: 52px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(48px, 10vw, 74px);
+  }
+
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .role-card {
+    min-height: 160px;
+  }
+
+  .portal-footer {
+    min-height: 76px;
+    align-items: start;
+    padding: 14px 0;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .data-strip {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar,
+  .hero-content,
+  .access-zone,
+  .portal-footer {
+    width: calc(100% - 28px);
+  }
+
+  .school-brand img {
+    width: 136px;
+  }
+
+  .topbar-meta {
+    gap: 10px;
+  }
+
+  .system-state span:last-child {
+    display: none;
+  }
+
+  .hero-content {
+    padding-top: 38px;
+  }
+
+  .hero-copy h1 {
+    margin-top: 18px;
+    font-size: 48px;
+  }
+
+  .hero-summary {
+    max-width: 280px;
+    font-size: 15px;
+  }
+
+  .feature-line {
+    align-items: start;
+    margin-top: 24px;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .feature-line span,
+  .feature-line span + span {
+    padding: 0;
+  }
+
+  .feature-line span + span::before {
+    display: none;
+  }
+
+  .access-zone {
+    padding-top: 28px;
+  }
+
+  .access-heading h2 {
+    font-size: 20px;
+  }
+
+  .gallery-dot {
+    width: 18px;
+  }
+
+  .gallery-dot.is-active {
+    width: 34px;
+  }
+
+  .role-card {
+    min-height: 150px;
+    padding: 16px 18px;
+  }
+
+  .role-main {
+    margin-top: 10px;
+  }
+
+  .role-main h3 {
+    font-size: 21px;
+  }
+
+  .footer-intro {
+    gap: 10px;
+  }
+}

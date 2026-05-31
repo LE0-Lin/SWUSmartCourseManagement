@@ -7,7 +7,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/online_edu?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
     username: root
-    password: tm050711
+    password: ${MYSQL_PWD:}
   servlet:
     multipart:
       max-file-size: 1GB
@@ -20,7 +20,7 @@ spring:
 
 # storage configuration
 storage:
-  local-path: E:/SmartCourseV4/SmartCourse/uploads/
+  local-path: E:/SmartCourseV3.2/SmartCourse/uploads/
   access-path: /api/pub/image/
 
 mybatis-plus:

@@ -66,6 +66,7 @@ router.beforeEach(async(to, from, next) => {
           next()
         }
       } catch (error) {
+        await store.dispatch('user/logout')
         Message.error(error || 'Has Error')
         next(`/login?redirect=${to.path}`)
         NProgress.done()

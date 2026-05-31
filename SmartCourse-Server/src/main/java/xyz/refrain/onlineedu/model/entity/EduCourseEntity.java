@@ -52,6 +52,30 @@ public class EduCourseEntity implements Serializable {
 	@TableField("lesson_num")
 	private Integer lessonNum;
 
+	@ApiModelProperty(value = "培养方案课程代码")
+	@TableField("course_code")
+	private String courseCode;
+
+	@ApiModelProperty(value = "学分")
+	@TableField("credit")
+	private Double credit;
+
+	@ApiModelProperty(value = "培养方案课程类型")
+	@TableField("course_type")
+	private String courseType;
+
+	@ApiModelProperty(value = "适用专业")
+	@TableField("major_name")
+	private String majorName;
+
+	@ApiModelProperty(value = "培养方案建议开课学期")
+	@TableField("curriculum_semester")
+	private String curriculumSemester;
+
+	@ApiModelProperty(value = "考核方式")
+	@TableField("assessment_method")
+	private String assessmentMethod;
+
 	@ApiModelProperty(value = "平时成绩占比")
 	@TableField("usual_score_weight")
 	private Integer usualScoreWeight;

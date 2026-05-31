@@ -12,10 +12,15 @@
     </el-col>
     <el-col :span="20">
       <el-carousel trigger="click" height="300px" :interval="5000" style="border-radius: 5px;">
-        <el-carousel-item v-for="banner in bannerData" :key="banner.id">
-          <a :href="banner.linkUrl" :title="banner.title" target="_blank">
-            <el-image :src="encodeOssFileUri(banner.imageUrl)" fit="cover" class="banner-img" />
-          </a>
+        <el-carousel-item v-for="course in carouselCourses" :key="course.id">
+          <router-link
+            :to="{ name: 'Course', params: { id: course.id } }"
+            :title="course.title"
+            class="banner-link"
+          >
+            <el-image :src="encodeOssFileUri(course.cover)" fit="cover" class="banner-img" />
+            <div class="banner-caption">{{ course.title }}</div>
+          </router-link>
         </el-carousel-item>
       </el-carousel>
     </el-col>
@@ -23,7 +28,7 @@
 </template>
 
 <script>
-import { getSubjects, getBanners } from '@/api/content'
+import { getSubjects, getSelectableCourses } from '@/api/content'
 import { encodeOssFileUri } from '@/utils'
 export default {
   name: 'Carousel',
@@ -31,12 +36,12 @@ export default {
     return {
       selectionValue: null,
       subjectData: [],
-      bannerData: []
+      carouselCourses: []
     }
   },
   created() {
     this.getSubjects()
-    this.getBanners()
+    this.getCarouselCourses()
   },
   methods: {
     selected(val) {
@@ -62,10 +67,21 @@ export default {
         this.subjectData = resp.data
       })
     },
-    getBanners() {
-      getBanners().then(resp => {
-        this.bannerData = resp.data
+    getCarouselCourses() {
+      getSelectableCourses().then(resp => {
+        const courses = resp.data || []
+        this.carouselCourses = this.shuffle(courses.filter(course => course.cover)).slice(0, 5)
       })
+    },
+    shuffle(courses) {
+      const result = [...courses]
+      for (let index = result.length - 1; index > 0; index--) {
+        const randomIndex = Math.floor(Math.random() * (index + 1))
+        const current = result[index]
+        result[index] = result[randomIndex]
+        result[randomIndex] = current
+      }
+      return result
     }
   }
 }
@@ -112,8 +128,26 @@ export default {
 </style>
 
 <style scoped lang="scss">
+.banner-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .banner-img{
   width: 100%;
   height: 100%;
+}
+
+.banner-caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 14px 22px 30px;
+  color: #fff;
+  font-size: 18px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .62));
 }
 </style>

@@ -3,7 +3,7 @@ import { login, logout, getInfo } from '@/api/user'
 const getDefaultState = () => {
   return {
     user: {},
-    token: ''
+    token: localStorage.getItem('token') || ''
   }
 }
 

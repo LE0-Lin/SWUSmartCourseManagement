@@ -136,7 +136,7 @@ export default {
         subjectId: null,
         title: '',
         status: null, // 显示通过审核的
-        enable: null
+        enable: true
       },
       total: 0,
       listData: [],

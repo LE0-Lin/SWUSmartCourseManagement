@@ -24,8 +24,6 @@ Vue.prototype.$verify = Verify
 Vue.prototype.$login = Login
 
 // // 没有登录信息，防止下次也获取信息
-let preventGetInfo = false
-
 // 路由发生变化修改页面title
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 router.beforeEach(async(to, from, next) => {
@@ -41,6 +39,14 @@ router.beforeEach(async(to, from, next) => {
     next()
   } else if (isLogin) {
     next()
+  } else if (store.getters.token) {
+    try {
+      await store.dispatch('user/getInfo')
+      next()
+    } catch (error) {
+      await store.dispatch('user/logout')
+      next({ path: '/login' })
+    }
   } else {
     // 未登录，跳转到登录页面
     next({ path: '/login' })

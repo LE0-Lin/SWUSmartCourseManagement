@@ -1,5 +1,9 @@
 <template>
   <div class="login-container">
+    <a class="portal-back" href="http://localhost:9527">
+      <i class="el-icon-back" />
+      返回统一门户
+    </a>
     <el-form
       ref="loginForm"
       :model="loginForm"
@@ -80,8 +84,8 @@ export default {
     }
     return {
       loginForm: {
-        username: '13077590001',
-        password: ''
+        username: '13800138002',
+        password: '123456'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -262,6 +266,24 @@ $light_gray: #eee;
   .rememberMe {
     color: $dark_gray;
     margin-bottom: 22px;
+  }
+}
+
+.portal-back {
+  position: fixed;
+  top: 28px;
+  left: 32px;
+  color: rgba(255, 255, 255, .72);
+  font-size: 15px;
+  text-decoration: none;
+  transition: color .25s;
+
+  &:hover {
+    color: #409eff;
+  }
+
+  i {
+    margin-right: 6px;
   }
 }
 </style>

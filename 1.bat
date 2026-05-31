@@ -79,7 +79,7 @@ echo const fs = require('fs'); >> _db_init.js
 echo async function init() { >> _db_init.js
 echo   try { >> _db_init.js
 echo     console.log('  [Node.js] Connecting to MySQL...'); >> _db_init.js
-echo     const conn = await mysql.createConnection({ host: 'localhost', user: 'root', password: '%MYSQL_PWD%', multipleStatements: true }); >> _db_init.js
+echo     const conn = await mysql.createConnection({ host: 'localhost', user: 'root', password: process.env.MYSQL_PWD ^|^| '', multipleStatements: true }); >> _db_init.js
 echo     console.log('  [Node.js] Connection successful! Creating database online_edu...'); >> _db_init.js
 echo     await conn.query('CREATE DATABASE IF NOT EXISTS online_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'); >> _db_init.js
 echo     await conn.query('USE online_edu;'); >> _db_init.js
@@ -109,7 +109,7 @@ goto skip_db
 :mysql_found
 echo.
 echo [1/6] Initializing Database via MYSQL CMD...
-!MYSQL_CMD! -uroot -p%MYSQL_PWD% -e "CREATE DATABASE IF NOT EXISTS online_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+!MYSQL_CMD! -uroot -e "CREATE DATABASE IF NOT EXISTS online_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 if %ERRORLEVEL% neq 0 (
     echo.
     echo ===================================================
@@ -119,7 +119,7 @@ if %ERRORLEVEL% neq 0 (
     pause
     goto skip_db
 )
-!MYSQL_CMD! -uroot -p%MYSQL_PWD% online_edu < "%~dp0%SERVER_DIR%\schema.sql"
+!MYSQL_CMD! -uroot online_edu < "%~dp0%SERVER_DIR%\schema.sql"
 echo Database initialized successfully.
 
 
@@ -141,7 +141,7 @@ if not defined MYSQL_PWD (
 
 echo [3/6] Starting SpringBoot Backend...
 if exist "%~dp0%SERVER_DIR%\target\online-edu-0.0.1-SNAPSHOT.jar" (
-    start "Backend" cmd /k "cd /d %~dp0%SERVER_DIR%\target && java -jar online-edu-0.0.1-SNAPSHOT.jar --spring.datasource.password=%MYSQL_PWD%"
+    start "Backend" cmd /k "cd /d %~dp0%SERVER_DIR%\target && java -jar online-edu-0.0.1-SNAPSHOT.jar"
 ) else (
     echo.
     echo ===================================================
