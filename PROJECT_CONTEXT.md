@@ -331,3 +331,19 @@ and high-risk distribution while exposing distinct advisor scenarios:
 - Remaining security note: the public Git history previously contained a local
   database password. Rotate that local password once and consider rewriting
   repository history if the old value must be fully removed from GitHub.
+
+## 2026-06-03 One-Click Startup Portal Opening
+
+- Fixed the one-click startup browser behavior. The three Vue frontends no
+  longer auto-open their own pages because `devServer.open` is now `false` in
+  the student, teacher, and admin `vue.config.js` files.
+- Updated both startup batches (`start_smartcourse.bat` and the Chinese
+  one-click startup batch) to open only `http://localhost:9527` after the
+  unified portal server starts.
+- Root cause: the batch file launched the services, then Vue CLI opened the
+  three frontend pages automatically while the portal had no explicit browser
+  open step.
+- Verification: `node --check` passed for all three `vue.config.js` files,
+  student `npm run build` passed, teacher/admin `npm run build:prod` passed,
+  and `git diff --check` passed. Build output still contains only the existing
+  asset-size/Sass deprecation warnings.

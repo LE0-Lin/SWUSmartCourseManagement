@@ -74,6 +74,8 @@ call :start_vue "%ADMIN_DIR%" "SmartCourse-Admin"
 
 echo [7/8] Starting unified portal...
 start "SmartCourse-Portal" cmd /k "pushd ""%PORTAL_DIR%"" && node server.cjs"
+timeout /t 2 /nobreak >nul
+start "" "http://localhost:9527"
 
 echo.
 echo [8/8] Startup commands have been launched.
