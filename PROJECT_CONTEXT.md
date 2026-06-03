@@ -340,10 +340,15 @@ and high-risk distribution while exposing distinct advisor scenarios:
 - Updated both startup batches (`start_smartcourse.bat` and the Chinese
   one-click startup batch) to open only `http://localhost:9527` after the
   unified portal server starts.
+- Updated the same startup batches to pass `--storage.local-path` dynamically
+  from the current script directory, so zipped deployments load image assets
+  from the unpacked `uploads` folder instead of depending on the original
+  machine's absolute `E:/SmartCourseV3.2/...` path.
 - Root cause: the batch file launched the services, then Vue CLI opened the
   three frontend pages automatically while the portal had no explicit browser
   open step.
 - Verification: `node --check` passed for all three `vue.config.js` files,
   student `npm run build` passed, teacher/admin `npm run build:prod` passed,
+  `cmd` path-substitution smoke test produced `D:/Demo/SmartCourse/uploads/`,
   and `git diff --check` passed. Build output still contains only the existing
   asset-size/Sass deprecation warnings.

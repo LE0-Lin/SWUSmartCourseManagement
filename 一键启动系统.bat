@@ -8,6 +8,7 @@ set "TEACHER_DIR=%ROOT%SmartCourse-Teacher"
 set "ADMIN_DIR=%ROOT%SmartCourse-Admin"
 set "PORTAL_DIR=%ROOT%SmartCourse-Portal"
 set "JAR=%SERVER_DIR%\target\online-edu-0.0.1-SNAPSHOT.jar"
+set "UPLOADS_DIR=%ROOT:\=/%uploads/"
 
 title SmartCourse One Click Startup
 
@@ -64,7 +65,7 @@ if not exist "%JAR%" (
 )
 
 echo [5/8] Starting SpringBoot backend...
-start "SmartCourse-Backend" cmd /k "pushd ""%SERVER_DIR%"" && java -jar ""%JAR%"""
+start "SmartCourse-Backend" cmd /k "pushd ""%SERVER_DIR%"" && java -jar ""%JAR%"" --storage.local-path=""%UPLOADS_DIR%"""
 timeout /t 5 /nobreak >nul
 
 echo [6/8] Starting Vue frontends...
