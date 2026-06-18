@@ -1,8 +1,9 @@
 <template>
   <el-row type="flex" justify="center" class="header">
     <el-col :span="20" class="nav-content">
-      <router-link to="/" class="logo" style="color: #409eff;margin-right: 10px;">
-        西大智能课程管理系统
+      <router-link to="/" class="logo">
+        <span class="logo-full">西大智能课程管理系统</span>
+        <span class="logo-short">西大课程系统</span>
       </router-link>
       <el-input
         ref="SearchInput"
@@ -17,7 +18,7 @@
       <div class="nav-right">
         <a class="portal-entry" href="http://localhost:9527">
           <i class="el-icon-s-home" />
-          统一门户
+          <span class="portal-label">统一门户</span>
         </a>
         <el-link
           v-if="user===null || Object.keys(user).length===0"
@@ -109,9 +110,6 @@ export default {
 <style lang="scss">
 .nav-search {
   width: 240px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
 
   .el-input-group__append {
     background-color: #409eff;
@@ -123,13 +121,17 @@ export default {
 
 <style scoped lang="scss">
 .header {
-  height: 60px;
+  min-height: 60px;
   background-color: #fff;
 
   .nav-content {
-    position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 240px minmax(220px, 1fr);
+    gap: 24px;
     align-items: center;
+    width: calc(100% - 48px);
+    max-width: 1440px;
+    min-height: 60px;
   }
 
   .nav-item {
@@ -146,10 +148,9 @@ export default {
   }
 
   .nav-right {
-    position: absolute;
-    right: 0;
     display: flex;
     align-items: center;
+    justify-self: end;
   }
 
   .portal-entry {
@@ -169,7 +170,16 @@ export default {
   }
 
   .logo {
+    justify-self: start;
+    color: #409eff;
     font-size: 26px;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .logo-short {
+    display: none;
   }
 
   .avatar-container {
@@ -192,6 +202,70 @@ export default {
         transition: all .7s;
         font-size: 14px;
       }
+    }
+  }
+}
+
+@media (max-width: 1000px) {
+  .header {
+    .nav-content {
+      grid-template-columns: minmax(150px, 1fr) 200px auto;
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 22px;
+    }
+
+    .logo-full,
+    .portal-label,
+    .avatar-container .avatar-wrapper .name {
+      display: none;
+    }
+
+    .logo-short {
+      display: inline;
+    }
+
+    .portal-entry {
+      margin-right: 14px;
+      font-size: 18px;
+
+      i {
+        margin-right: 0;
+      }
+    }
+  }
+
+  .nav-search {
+    width: 200px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    .nav-content {
+      grid-template-areas:
+        "logo right"
+        "search search";
+      grid-template-columns: 1fr auto;
+      gap: 8px 12px;
+      width: calc(100% - 24px);
+      padding: 10px 0;
+    }
+
+    .logo {
+      grid-area: logo;
+      font-size: 20px;
+    }
+
+    .nav-search {
+      grid-area: search;
+      width: 100%;
+    }
+
+    .nav-right {
+      grid-area: right;
     }
   }
 }

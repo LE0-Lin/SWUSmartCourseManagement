@@ -1,6 +1,6 @@
 <template>
   <el-row type="flex" justify="center">
-    <el-col :span="20">
+    <el-col :span="20" class="home-container">
       <v-carousel style="margin-top: 20px" />
       <div class="course-list">课程列表</div>
       <v-course-list :course-list="courseList" style="margin-top: 20px" />
@@ -60,9 +60,20 @@ export default {
   border-left: #409eff solid 5px;
 }
 
+.home-container {
+  width: calc(100% - 48px);
+  max-width: 1440px;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
   margin: 20px 0 40px;
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    width: calc(100% - 24px);
+  }
 }
 </style>

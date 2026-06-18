@@ -352,3 +352,22 @@ and high-risk distribution while exposing distinct advisor scenarios:
   `cmd` path-substitution smoke test produced `D:/Demo/SmartCourse/uploads/`,
   and `git diff --check` passed. Build output still contains only the existing
   asset-size/Sass deprecation warnings.
+
+## 2026-06-18 Responsive Student Homepage Covers
+
+- Restored the course-category color band as a frontend overlay instead of
+  relying on the bottom pixels of the cover image. The category label now
+  remains visible even when `object-fit: cover` crops a wide image.
+- Applied the same category band to the five-course homepage carousel and
+  kept the course title immediately above it.
+- Added a shared course-type label/color mapping for all six curriculum
+  categories.
+- Made the student homepage responsive: a `1440px` maximum content width,
+  carousel height clamped between `260px` and `340px`, `16:9` course covers,
+  and course grids that adapt from 4 to 3/2/1 columns.
+- Reworked the student header into a responsive grid so the logo, search,
+  portal entry, and profile controls do not overlap on tablet or mobile widths.
+- Verification: student `npm run build` passed with the existing asset-size
+  and Sass warnings; `git diff --check` passed. Headless Edge screenshots and
+  DOM measurements passed at `2048x900`, `1366x768`, `768x900`, and `390x844`.
+  QA screenshots are under `E:/SmartCourseV4/outputs/home-responsive-qa`.

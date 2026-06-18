@@ -1,10 +1,27 @@
 <template>
   <div>
     <el-row :gutter="20" class="course">
-      <el-col v-for="course of courseList" :key="course.id" :span="6">
+      <el-col
+        v-for="course of courseList"
+        :key="course.id"
+        :xs="24"
+        :sm="12"
+        :md="8"
+        :lg="6"
+        :xl="6"
+      >
         <router-link :to="{name:'Course', params: {id:course.id}}">
           <div class="course-item">
-            <el-image fit="cover" :src="encodeOssFileUri(course.cover)" class="img" />
+            <div class="cover-wrap">
+              <el-image fit="cover" :src="encodeOssFileUri(course.cover)" class="img" />
+              <div
+                v-if="course.courseType"
+                class="category-strip"
+                :style="{ backgroundColor: courseTypeMeta(course.courseType).color }"
+              >
+                {{ courseTypeMeta(course.courseType).label }}
+              </div>
+            </div>
             <div class="info">
               <div class="title ellipse" :title="course.title">{{ course.title }}</div>
               <div class="middle">
@@ -30,6 +47,7 @@
 
 <script>
 import { encodeOssFileUri } from '@/utils'
+import { getCourseTypeMeta } from '@/utils/course_type'
 
 export default {
   name: 'CourseList',
@@ -46,6 +64,9 @@ export default {
   methods: {
     encodeOssFileUri(ossUri) {
       return encodeOssFileUri(ossUri)
+    },
+    courseTypeMeta(courseType) {
+      return getCourseTypeMeta(courseType)
     }
   }
 }
@@ -64,10 +85,34 @@ export default {
     transition: all .3s;
   }
 
-  .img {
-    height: 140px;
+  .cover-wrap {
+    position: relative;
     width: 100%;
-    border-radius: 5px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 5px 5px 0 0;
+
+    .img {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+
+    .category-strip {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 12px;
+      box-sizing: border-box;
+      color: #fff;
+      font-size: 12px;
+      line-height: 28px;
+    }
   }
 
   .info {

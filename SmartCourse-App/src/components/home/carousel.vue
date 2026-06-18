@@ -1,7 +1,7 @@
 <!-- 分类与轮播 -->
 <template>
-  <el-row>
-    <el-col :span="4">
+  <el-row class="home-carousel">
+    <el-col :xs="24" :sm="6" :md="5" :lg="4">
       <el-cascader-panel
         v-model="selectionValue"
         :options="subjectData"
@@ -10,8 +10,13 @@
         @change="selected"
       />
     </el-col>
-    <el-col :span="20">
-      <el-carousel trigger="click" height="300px" :interval="5000" style="border-radius: 5px;">
+    <el-col :xs="24" :sm="18" :md="19" :lg="20">
+      <el-carousel
+        trigger="click"
+        height="var(--home-hero-height)"
+        :interval="5000"
+        class="course-carousel"
+      >
         <el-carousel-item v-for="course in carouselCourses" :key="course.id">
           <router-link
             :to="{ name: 'Course', params: { id: course.id } }"
@@ -20,6 +25,13 @@
           >
             <el-image :src="encodeOssFileUri(course.cover)" fit="cover" class="banner-img" />
             <div class="banner-caption">{{ course.title }}</div>
+            <div
+              v-if="course.courseType"
+              class="banner-category"
+              :style="{ backgroundColor: courseTypeMeta(course.courseType).color }"
+            >
+              {{ courseTypeMeta(course.courseType).label }}
+            </div>
           </router-link>
         </el-carousel-item>
       </el-carousel>
@@ -30,6 +42,7 @@
 <script>
 import { getSubjects, getSelectableCourses } from '@/api/content'
 import { encodeOssFileUri } from '@/utils'
+import { getCourseTypeMeta } from '@/utils/course_type'
 export default {
   name: 'Carousel',
   data() {
@@ -62,6 +75,9 @@ export default {
     encodeOssFileUri(ossUri) {
       return encodeOssFileUri(ossUri)
     },
+    courseTypeMeta(courseType) {
+      return getCourseTypeMeta(courseType)
+    },
     getSubjects() {
       getSubjects().then(resp => {
         this.subjectData = resp.data
@@ -88,9 +104,13 @@ export default {
 </script>
 
 <style lang="scss">
+.home-carousel {
+  --home-hero-height: clamp(260px, 22vw, 340px);
+}
+
 .subject-selection {
   position: relative;
-  height: 300px;
+  height: var(--home-hero-height);
   z-index: 1000;
   border-radius: 5px;
 
@@ -143,11 +163,39 @@ export default {
 .banner-caption {
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: 28px;
   left: 0;
-  padding: 14px 22px 30px;
+  padding: 14px 22px 10px;
   color: #fff;
   font-size: 18px;
   background: linear-gradient(transparent, rgba(0, 0, 0, .62));
+}
+
+.banner-category {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 22px;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: 13px;
+  line-height: 28px;
+}
+
+.course-carousel {
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+  .home-carousel,
+  .subject-selection {
+    overflow: hidden;
+  }
 }
 </style>
