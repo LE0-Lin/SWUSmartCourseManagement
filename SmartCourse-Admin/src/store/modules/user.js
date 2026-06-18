@@ -5,7 +5,7 @@ import store from '@/store'
 const getDefaultState = () => {
   return {
     user: {},
-    token: ''
+    token: localStorage.getItem('token') || ''
   }
 }
 

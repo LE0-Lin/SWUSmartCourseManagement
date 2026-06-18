@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#061522">
+    <title>西大智慧课程管理系统</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="portal-shell">
+      <div class="campus-gallery" aria-hidden="true">
+        <div class="campus-slide is-active" style="background-image: url('./assets/images/campus-aerial.jpg')"></div>
+        <div class="campus-slide" style="background-image: url('./assets/images/campus-spring.jpg')"></div>
+        <div class="campus-slide" style="background-image: url('./assets/images/campus-summer.jpg')"></div>
+      </div>
+
+      <div class="atmosphere" aria-hidden="true"></div>
+      <div class="grid-lines" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <a class="school-brand" href="https://www.swu.edu.cn/" target="_blank" rel="noreferrer">
+          <img src="./assets/images/swu-logo.png" alt="西南大学">
+          <span class="brand-divider"></span>
+          <span class="brand-system">智慧课程管理系统</span>
+        </a>
+
+        <div class="topbar-meta">
+          <div class="system-state">
+            <span class="pulse"></span>
+            <span>系统服务运行中</span>
+          </div>
+          <div class="meta-divider"></div>
+          <time id="current-time">--:--</time>
+        </div>
+      </header>
+
+      <section class="hero-content" aria-labelledby="portal-title">
+        <div class="hero-copy">
+          <p class="eyebrow">SOUTHWEST UNIVERSITY · ACADEMIC INTELLIGENCE PORTAL</p>
+          <h1 id="portal-title">
+            <span>西大智慧课程</span>
+            <strong>管理系统</strong>
+          </h1>
+          <p class="hero-summary">面向培养方案的课程管理与智能学业诊断平台</p>
+        </div>
+
+        <div class="feature-line" aria-label="系统能力">
+          <span>课程资源整合</span>
+          <span>培养方案匹配</span>
+          <span>智能选课诊断</span>
+        </div>
+      </section>
+
+      <section class="access-zone" aria-labelledby="access-title">
+        <div class="access-heading">
+          <div>
+            <p class="section-kicker">IDENTITY ACCESS</p>
+            <h2 id="access-title">选择身份进入系统</h2>
+          </div>
+          <div class="gallery-dots" role="tablist" aria-label="校园图片轮播">
+            <button class="gallery-dot is-active" type="button" aria-label="查看校园俯瞰图"></button>
+            <button class="gallery-dot" type="button" aria-label="查看春日校园图"></button>
+            <button class="gallery-dot" type="button" aria-label="查看盛夏校园图"></button>
+          </div>
+        </div>
+
+        <div class="role-grid">
+          <a class="role-card student-card" href="http://localhost:9530" target="_blank" rel="noreferrer">
+            <div class="role-icon"><i data-lucide="graduation-cap"></i></div>
+            <div class="role-number">01</div>
+            <div class="role-main">
+              <p class="role-en">STUDENT SERVICE</p>
+              <h3>学生服务端</h3>
+              <p>课程浏览 · 智能选课 · 学业诊断</p>
+            </div>
+            <div class="role-footer">
+              <span class="endpoint-state" data-endpoint="http://localhost:9530"><b></b>正在检测</span>
+              <span class="enter-icon"><i data-lucide="arrow-up-right"></i></span>
+            </div>
+          </a>
+
+          <a class="role-card teacher-card" href="http://localhost:9529" target="_blank" rel="noreferrer">
+            <div class="role-icon"><i data-lucide="presentation"></i></div>
+            <div class="role-number">02</div>
+            <div class="role-main">
+              <p class="role-en">TEACHER WORKBENCH</p>
+              <h3>教师工作台</h3>
+              <p>教学管理 · 课程维护 · 学情查看</p>
+            </div>
+            <div class="role-footer">
+              <span class="endpoint-state" data-endpoint="http://localhost:9529"><b></b>正在检测</span>
+              <span class="enter-icon"><i data-lucide="arrow-up-right"></i></span>
+            </div>
+          </a>
+
+          <a class="role-card admin-card" href="http://localhost:9528" target="_blank" rel="noreferrer">
+            <div class="role-icon"><i data-lucide="shield-check"></i></div>
+            <div class="role-number">03</div>
+            <div class="role-main">
+              <p class="role-en">ACADEMIC ADMINISTRATION</p>
+              <h3>教务管理端</h3>
+              <p>数据治理 · 预警管理 · 运行分析</p>
+            </div>
+            <div class="role-footer">
+              <span class="endpoint-state" data-endpoint="http://localhost:9528"><b></b>正在检测</span>
+              <span class="enter-icon"><i data-lucide="arrow-up-right"></i></span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <footer class="portal-footer">
+        <div class="footer-intro">
+          <span class="footer-mark">SWU</span>
+          <span>西南大学计算机与信息科学学院</span>
+        </div>
+        <div class="data-strip">
+          <span><b>79</b> 培养方案课程</span>
+          <span><b>6</b> 课程分类</span>
+          <span><b>160</b> 毕业要求学分</span>
+          <span><b>3</b> 协同服务端</span>
+        </div>
+      </footer>
+    </main>
+
+    <script src="./assets/vendor/lucide.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

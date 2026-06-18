@@ -35,6 +35,13 @@ export function getCourses(data) {
   })
 }
 
+export function getSelectableCourses() {
+  return request({
+    url: `${api_prefix}/get/courses/selectable`,
+    method: 'get'
+  })
+}
+
 // 获取课程详情
 export function getCourseDetail(id) {
   return request({

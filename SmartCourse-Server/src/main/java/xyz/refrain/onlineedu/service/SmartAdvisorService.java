@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class SmartAdvisorService {
 
-    private static final String DEFAULT_MAJOR = "计算机科学与技术";
+    private static final String DEFAULT_MAJOR = "计算机科学与技术（中外合作办学）";
     private static final double PASS_SCORE = 60.0;
 
     private final JdbcTemplate jdbcTemplate;
@@ -232,6 +232,7 @@ public class SmartAdvisorService {
             int rawScore = (int) Math.round(Math.max(0, remaining) * 15 + credit * 8
                     + asInt(candidate.get("selectCount")) * 2 + asInt(candidate.get("viewCount")));
             boolean selectable = conflict == null;
+            int rankScore = rawScore + (remaining > 0 ? 10000 : 0) - (selectable ? 0 : 7500);
             Map<String, Object> item = new LinkedHashMap<>(candidate);
             item.put("typeLabel", courseTypeLabel(type));
             item.put("credit", credit);
@@ -242,12 +243,28 @@ public class SmartAdvisorService {
             item.put("fitScore", selectable ? Math.min(100, Math.max(55, rawScore)) : Math.min(72, Math.max(45, rawScore / 2)));
             item.put("reason", buildRecommendationReason(courseTypeLabel(type), credit, remaining, conflict));
             item.put("scheduleText", scheduleText(targetSchedules));
+            item.put("rankScore", rankScore);
             result.add(item);
         }
-        return result.stream()
-                .sorted((left, right) -> Integer.compare(asInt(right.get("fitScore")), asInt(left.get("fitScore"))))
-                .limit(12)
+        List<Map<String, Object>> ranked = result.stream()
+                .sorted((left, right) -> Integer.compare(asInt(right.get("rankScore")), asInt(left.get("rankScore"))))
                 .collect(Collectors.toList());
+        List<Map<String, Object>> visible = ranked.stream().limit(12).collect(Collectors.toList());
+        boolean hasVisibleConflict = visible.stream().anyMatch(item -> Boolean.TRUE.equals(item.get("conflict")));
+        if (!hasVisibleConflict) {
+            for (Map<String, Object> item : ranked) {
+                if (Boolean.TRUE.equals(item.get("conflict"))) {
+                    if (visible.size() >= 12) {
+                        visible.set(visible.size() - 1, item);
+                    } else {
+                        visible.add(item);
+                    }
+                    break;
+                }
+            }
+        }
+        ranked.forEach(item -> item.remove("rankScore"));
+        return visible;
     }
 
     private String buildRecommendationReason(String typeLabel, double credit, double remaining, Map<String, Object> conflict) {
@@ -267,34 +284,62 @@ public class SmartAdvisorService {
         for (CreditBucket bucket : buckets.values()) {
             missing.put(bucket.getTypeCode(), bucket.getRemainingAfterCurrent());
         }
+        List<Map<String, Object>> candidates = recommendations.stream()
+                .filter(course -> Boolean.TRUE.equals(course.get("selectable")))
+                .filter(course -> missing.getOrDefault(asString(course.get("courseType"), "MAJOR_ELECTIVE"), 0.0) > 0)
+                .collect(Collectors.toList());
+        PathSelection best = new PathSelection();
+        searchPathPlan(candidates, 0, missing, new HashMap<>(), new ArrayList<>(),
+                new ArrayList<>(selectedSchedules), new HashMap<>(), 0, best);
+
         List<Map<String, Object>> path = new ArrayList<>();
-        List<Map<String, Object>> plannedSchedules = new ArrayList<>(selectedSchedules);
-        for (Map<String, Object> course : recommendations) {
-            if (!Boolean.TRUE.equals(course.get("selectable"))) {
-                continue;
-            }
-            int courseId = asInt(course.get("courseId"));
-            List<Map<String, Object>> targetSchedules = querySchedulesForCourses(new LinkedHashSet<>(Collections.singletonList(courseId)));
-            if (findFirstConflict(plannedSchedules, targetSchedules) != null) {
-                continue;
-            }
+        Map<String, Double> remaining = new HashMap<>(missing);
+        for (Map<String, Object> course : best.courses) {
             String type = asString(course.get("courseType"), "MAJOR_ELECTIVE");
-            double need = missing.getOrDefault(type, 0.0);
-            if (need <= 0) {
-                continue;
-            }
+            double need = remaining.getOrDefault(type, 0.0);
             double credit = asDouble(course.get("credit"), 2);
             Map<String, Object> step = new LinkedHashMap<>(course);
             step.put("afterSelectGap", Math.max(0, need - credit));
             path.add(step);
-            plannedSchedules.addAll(targetSchedules);
-            missing.put(type, need - credit);
-            boolean stillMissing = missing.values().stream().anyMatch(value -> value > 0);
-            if (!stillMissing || path.size() >= 4) {
-                break;
-            }
+            remaining.put(type, need - credit);
         }
         return path;
+    }
+
+    private void searchPathPlan(List<Map<String, Object>> candidates,
+                                int start,
+                                Map<String, Double> missing,
+                                Map<String, Double> contributions,
+                                List<Map<String, Object>> chosen,
+                                List<Map<String, Object>> plannedSchedules,
+                                Map<Integer, List<Map<String, Object>>> scheduleCache,
+                                int rankTotal,
+                                PathSelection best) {
+        if (!chosen.isEmpty()) {
+            best.consider(chosen, missing, contributions, rankTotal);
+        }
+        if (chosen.size() >= 4) {
+            return;
+        }
+        for (int index = start; index < candidates.size(); index++) {
+            Map<String, Object> course = candidates.get(index);
+            int courseId = asInt(course.get("courseId"));
+            List<Map<String, Object>> schedules = scheduleCache.computeIfAbsent(courseId,
+                    id -> querySchedulesForCourses(new LinkedHashSet<>(Collections.singletonList(id))));
+            if (findFirstConflict(plannedSchedules, schedules) != null) {
+                continue;
+            }
+            String type = asString(course.get("courseType"), "MAJOR_ELECTIVE");
+            Map<String, Double> nextContributions = new HashMap<>(contributions);
+            nextContributions.put(type, nextContributions.getOrDefault(type, 0.0)
+                    + asDouble(course.get("credit"), 2));
+            List<Map<String, Object>> nextChosen = new ArrayList<>(chosen);
+            nextChosen.add(course);
+            List<Map<String, Object>> nextSchedules = new ArrayList<>(plannedSchedules);
+            nextSchedules.addAll(schedules);
+            searchPathPlan(candidates, index + 1, missing, nextContributions, nextChosen,
+                    nextSchedules, scheduleCache, rankTotal + index, best);
+        }
     }
 
     private Map<String, CreditBucket> summarizeCredits(Map<String, Requirement> requirements,
@@ -358,10 +403,12 @@ public class SmartAdvisorService {
 
     private Map<String, Requirement> buildRequirements() {
         Map<String, Requirement> map = new LinkedHashMap<>();
-        map.put("PUBLIC_REQUIRED", new Requirement("PUBLIC_REQUIRED", "公共必修", 4));
-        map.put("MAJOR_REQUIRED", new Requirement("MAJOR_REQUIRED", "专业必修", 18));
-        map.put("MAJOR_ELECTIVE", new Requirement("MAJOR_ELECTIVE", "专业选修", 6));
-        map.put("GENERAL_ELECTIVE", new Requirement("GENERAL_ELECTIVE", "通识选修", 4));
+        map.put("PUBLIC_REQUIRED", new Requirement("PUBLIC_REQUIRED", "通识教育必修", 37));
+        map.put("GENERAL_ELECTIVE", new Requirement("GENERAL_ELECTIVE", "通识教育选修", 8));
+        map.put("DISCIPLINE_REQUIRED", new Requirement("DISCIPLINE_REQUIRED", "学科基础", 33.5));
+        map.put("MAJOR_REQUIRED", new Requirement("MAJOR_REQUIRED", "专业发展必修", 32.5));
+        map.put("MAJOR_ELECTIVE", new Requirement("MAJOR_ELECTIVE", "专业发展选修", 17));
+        map.put("PRACTICE_REQUIRED", new Requirement("PRACTICE_REQUIRED", "综合实践", 32));
         return map;
     }
 
@@ -426,14 +473,18 @@ public class SmartAdvisorService {
     private String courseTypeLabel(String type) {
         switch (type) {
             case "PUBLIC_REQUIRED":
-                return "公共必修";
-            case "MAJOR_REQUIRED":
-                return "专业必修";
+                return "通识教育必修";
             case "GENERAL_ELECTIVE":
-                return "通识选修";
+                return "通识教育选修";
+            case "DISCIPLINE_REQUIRED":
+                return "学科基础";
+            case "MAJOR_REQUIRED":
+                return "专业发展必修";
+            case "PRACTICE_REQUIRED":
+                return "综合实践";
             case "MAJOR_ELECTIVE":
             default:
-                return "专业选修";
+                return "专业发展选修";
         }
     }
 
@@ -502,6 +553,37 @@ public class SmartAdvisorService {
             this.typeCode = typeCode;
             this.typeLabel = typeLabel;
             this.requiredCredits = requiredCredits;
+        }
+    }
+
+    private static class PathSelection {
+        private List<Map<String, Object>> courses = Collections.emptyList();
+        private double remaining = Double.MAX_VALUE;
+        private double overfill = Double.MAX_VALUE;
+        private int rankTotal = Integer.MAX_VALUE;
+
+        private void consider(List<Map<String, Object>> candidateCourses,
+                              Map<String, Double> missing,
+                              Map<String, Double> contributions,
+                              int candidateRankTotal) {
+            double candidateRemaining = 0;
+            double candidateOverfill = 0;
+            for (Map.Entry<String, Double> entry : missing.entrySet()) {
+                double contribution = contributions.getOrDefault(entry.getKey(), 0.0);
+                candidateRemaining += Math.max(0, entry.getValue() - contribution);
+                candidateOverfill += Math.max(0, contribution - entry.getValue());
+            }
+            boolean better = candidateRemaining < remaining
+                    || (candidateRemaining == remaining && candidateOverfill < overfill)
+                    || (candidateRemaining == remaining && candidateOverfill == overfill && candidateCourses.size() < courses.size())
+                    || (candidateRemaining == remaining && candidateOverfill == overfill
+                    && candidateCourses.size() == courses.size() && candidateRankTotal < rankTotal);
+            if (better) {
+                courses = new ArrayList<>(candidateCourses);
+                remaining = candidateRemaining;
+                overfill = candidateOverfill;
+                rankTotal = candidateRankTotal;
+            }
         }
     }
 

@@ -19,7 +19,11 @@
           <div>
             <div class="course-title">{{ course.title }}</div>
             <div class="course-meta">
+              <span v-if="course.courseCode">课程代码 {{ course.courseCode }}</span>
+              <span v-if="course.credit">{{ course.credit }} 学分</span>
               <span>{{ course.lessonNum || 0 }} 课时</span>
+              <span v-if="course.curriculumSemester">建议第 {{ course.curriculumSemester }} 学期开设</span>
+              <span v-if="course.assessmentMethod">{{ course.assessmentMethod }}</span>
               <span>{{ course.buyCount || 0 }} 人选课</span>
               <span>{{ course.viewCount || 0 }} 次浏览</span>
             </div>
@@ -224,6 +228,7 @@ export default {
 
 .course-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   margin-top: 10px;
   font-size: 13px;

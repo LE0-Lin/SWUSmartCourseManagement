@@ -5,6 +5,9 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
+      <el-tooltip effect="dark" content="返回统一门户" placement="bottom">
+        <a href="http://localhost:9527" aria-label="返回统一门户" class="nav-item el-icon-s-home" />
+      </el-tooltip>
       <router-link :to="{name:'Message'}" class="nav-item ">
         <el-tooltip effect="dark" content="消息" placement="right-end">
           <i class="el-icon-message-solid" />

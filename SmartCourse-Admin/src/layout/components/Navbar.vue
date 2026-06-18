@@ -5,9 +5,9 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <!--<el-tooltip class="item" effect="dark" content="跳转网站首页" placement="right-end">-->
-      <!--  <a href="" target="_blank" class="to-front el-icon-s-promotion" />-->
-      <!--</el-tooltip>-->
+      <el-tooltip effect="dark" content="返回统一门户" placement="bottom">
+        <a href="http://localhost:9527" aria-label="返回统一门户" class="portal-entry el-icon-s-home" />
+      </el-tooltip>
       <el-dropdown class="avatar-container" trigger="hover">
         <div class="avatar-wrapper">
           <el-avatar :size="32" :src="user.avatar" fit="contain" />
@@ -91,7 +91,7 @@ export default {
       outline: none;
     }
 
-    .to-front {
+    .portal-entry {
       position: relative;
       top: -8px;
       margin-right: 24px;

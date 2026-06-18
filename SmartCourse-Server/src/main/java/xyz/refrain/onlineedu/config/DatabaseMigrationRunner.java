@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import xyz.refrain.onlineedu.constant.CacheKeyPrefix;
 import xyz.refrain.onlineedu.utils.RedisUtils;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 @Component
 @Slf4j
 public class DatabaseMigrationRunner implements CommandLineRunner {
@@ -29,8 +33,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         seedCourseAdvisorData();
         seedDefaultTeacherIfNeeded();
         seedDemoTeachersIfNeeded();
-        seedAdvisorDemoCoursesIfNeeded();
-        seedProfessionalDemoDataIfNeeded();
+        seedCurriculumDemoData();
         seedDemoDataIfNeeded();
         clearSubjectCache();
     }
@@ -128,12 +131,18 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
     }
 
     private void ensureCourseAdvisorColumns() {
+        addColumnIfMissing("edu_course", "course_code",
+                "ALTER TABLE `edu_course` ADD COLUMN `course_code` varchar(32) NOT NULL DEFAULT '' AFTER `lesson_num`");
         addColumnIfMissing("edu_course", "credit",
-                "ALTER TABLE `edu_course` ADD COLUMN `credit` double NOT NULL DEFAULT 2 AFTER `lesson_num`");
+                "ALTER TABLE `edu_course` ADD COLUMN `credit` double NOT NULL DEFAULT 2 AFTER `course_code`");
         addColumnIfMissing("edu_course", "course_type",
                 "ALTER TABLE `edu_course` ADD COLUMN `course_type` varchar(32) NOT NULL DEFAULT 'MAJOR_ELECTIVE' AFTER `credit`");
         addColumnIfMissing("edu_course", "major_name",
-                "ALTER TABLE `edu_course` ADD COLUMN `major_name` varchar(64) NOT NULL DEFAULT '计算机科学与技术' AFTER `course_type`");
+                "ALTER TABLE `edu_course` ADD COLUMN `major_name` varchar(64) NOT NULL DEFAULT '计算机科学与技术（中外合作办学）' AFTER `course_type`");
+        addColumnIfMissing("edu_course", "curriculum_semester",
+                "ALTER TABLE `edu_course` ADD COLUMN `curriculum_semester` varchar(32) NOT NULL DEFAULT '' AFTER `major_name`");
+        addColumnIfMissing("edu_course", "assessment_method",
+                "ALTER TABLE `edu_course` ADD COLUMN `assessment_method` varchar(32) NOT NULL DEFAULT '' AFTER `curriculum_semester`");
     }
 
     private void ensureGradeCompositionColumns() {
@@ -165,11 +174,8 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
     private void seedCourseAdvisorData() {
         jdbcTemplate.update("UPDATE edu_course SET credit = 2 WHERE credit IS NULL OR credit <= 0");
         jdbcTemplate.update("UPDATE edu_course SET course_type = 'MAJOR_ELECTIVE' WHERE course_type IS NULL OR course_type = ''");
-        jdbcTemplate.update("UPDATE edu_course SET major_name = '计算机科学与技术' WHERE major_name IS NULL OR major_name = ''");
-        jdbcTemplate.update("UPDATE edu_course SET course_type = 'PUBLIC_REQUIRED', credit = 2 WHERE MOD(id, 4) = 1");
-        jdbcTemplate.update("UPDATE edu_course SET course_type = 'MAJOR_REQUIRED', credit = 3 WHERE MOD(id, 4) = 2");
-        jdbcTemplate.update("UPDATE edu_course SET course_type = 'MAJOR_ELECTIVE', credit = 2 WHERE MOD(id, 4) = 3");
-        jdbcTemplate.update("UPDATE edu_course SET course_type = 'GENERAL_ELECTIVE', credit = 2 WHERE MOD(id, 4) = 0");
+        jdbcTemplate.update("UPDATE edu_course SET major_name = ? WHERE major_name IS NULL OR major_name = ''",
+                CurriculumCourseCatalog.MAJOR_NAME);
     }
 
     private void seedDefaultTeacherIfNeeded() {
@@ -242,133 +248,237 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         return teacherId == null ? fallbackTeacherId : teacherId;
     }
 
-    private void seedAdvisorDemoCoursesIfNeeded() {
-        Integer teacherId = jdbcTemplate.query(
-                "SELECT id FROM edu_teacher WHERE mobile = '13800138001' OR name = 'teacher' ORDER BY id ASC LIMIT 1",
-                rs -> rs.next() ? rs.getInt(1) : null
-        );
-        int publicRequiredSubjectId = ensureSubject("公共必修", 0, 10);
-        int coreSubjectId = ensureSubject("专业核心", 0, 30);
-        int electiveSubjectId = ensureSubject("方向选修", 0, 40);
-        int generalSubjectId = ensureSubject("通识选修", 0, 60);
-        if (teacherId == null) {
-            return;
-        }
-        ensureDemoCourse("\u9ad8\u7b49\u6570\u5b66A", "PUBLIC_REQUIRED", 4, teacherId, publicRequiredSubjectId, 1, 3, 4, "A203");
+    private void seedCurriculumDemoData() {
+        normalizeLegacySubjects();
+        disableLegacyDemoCourses();
 
-        ensureDemoCourse("大学英语综合训练", "PUBLIC_REQUIRED", 2, teacherId, publicRequiredSubjectId, 1, 1, 2, "A101");
-        ensureDemoCourse("数据结构", "MAJOR_REQUIRED", 3, teacherId, coreSubjectId, 2, 3, 4, "B203");
-        ensureDemoCourse("操作系统", "MAJOR_REQUIRED", 3, teacherId, coreSubjectId, 3, 1, 2, "B204");
-        ensureDemoCourse("人工智能导论", "MAJOR_ELECTIVE", 2, teacherId, electiveSubjectId, 4, 5, 6, "C301");
-        ensureDemoCourse("数据可视化", "MAJOR_ELECTIVE", 2, teacherId, electiveSubjectId, 5, 3, 4, "C302");
-        ensureDemoCourse("创新创业基础", "GENERAL_ELECTIVE", 2, teacherId, generalSubjectId, 2, 7, 8, "D105");
-        ensureDemoCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, teacherId, generalSubjectId, 5, 7, 8, "D201");
+        Map<String, Integer> subjectIds = new LinkedHashMap<>();
+        subjectIds.put("通识教育必修", ensureSubject("通识教育必修", 0, 10));
+        subjectIds.put("通识教育选修", ensureSubject("通识教育选修", 0, 20));
+        subjectIds.put("学科基础", ensureSubject("学科基础", 0, 30));
+        subjectIds.put("专业发展必修", ensureSubject("专业发展必修", 0, 40));
+        subjectIds.put("专业发展选修", ensureSubject("专业发展选修", 0, 50));
+        subjectIds.put("综合实践", ensureSubject("综合实践", 0, 60));
+        jdbcTemplate.update("UPDATE edu_subject SET enable = 0 WHERE parent_id = 0 AND title IN "
+                + "('计算机科学与技术', '公共必修', '专业基础', '专业核心', '方向选修', '实践创新', '通识选修', '公共通识课')");
+
+        int sort = 1;
+        int electiveScheduleIndex = 0;
+        for (CurriculumCourseCatalog.CourseSeed seed : CurriculumCourseCatalog.all()) {
+            Integer subjectId = subjectIds.get(seed.category);
+            if (subjectId == null) {
+                continue;
+            }
+            Integer courseId = upsertCurriculumCourse(seed, subjectId, sort++);
+            if (courseId == null) {
+                continue;
+            }
+            jdbcTemplate.update("DELETE FROM edu_course_schedule WHERE course_id = ?", courseId);
+            if ("MAJOR_ELECTIVE".equals(seed.courseType)) {
+                seedCurriculumElectiveSchedule(courseId, electiveScheduleIndex++);
+            }
+        }
+
+        seedComputerScienceStudents();
+        tuneCurriculumRiskProfiles();
+        log.info("Seeded {} curriculum-based demo course records", CurriculumCourseCatalog.all().size());
     }
 
-    private void ensureDemoCourse(String title, String courseType, double credit, int teacherId, int subjectId,
-                                  int dayOfWeek, int sectionStart, int sectionEnd, String location) {
-        int assignedTeacherId = resolveDemoTeacherForCourse(courseType, location, teacherId);
-        Integer courseId = jdbcTemplate.query(
-                "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
-                rs -> rs.next() ? rs.getInt(1) : null,
-                title
-        );
-        if (courseId == null) {
-            jdbcTemplate.update(
-                    "INSERT INTO edu_course(teacher_id, subject_id, title, price, lesson_num, credit, course_type, "
-                            + "major_name, cover, description, buy_count, view_count, sort, enable, status, remarks) "
-                            + "VALUES (?, ?, ?, 0, 32, ?, ?, '计算机科学与技术', '/api/pub/image/default-course.png', "
-                            + "?, 0, 0, 0, 1, 1, '')",
-                    assignedTeacherId, subjectId, title, credit, courseType,
-                    "智能课程管理系统演示课程：" + title
+    private void disableLegacyDemoCourses() {
+        jdbcTemplate.update("UPDATE edu_course SET enable = 0 WHERE remarks = '专业演示课程' "
+                + "OR remarks LIKE '培养方案课程%' OR title IN "
+                + "('画图', '高等数学A', '大学英语综合训练', '程序设计基础', '离散数学', '数据结构', "
+                + "'计算机组成原理', '操作系统', '计算机网络', '数据库系统原理', '人工智能导论', "
+                + "'软件工程', '数据可视化', '网络安全基础', '创新创业基础', '大学生心理健康', "
+                + "'毕业设计智能选题实践')");
+    }
+
+    private Integer upsertCurriculumCourse(CurriculumCourseCatalog.CourseSeed seed, int subjectId, int sort) {
+        Integer courseId = null;
+        if (seed.code != null && !seed.code.isEmpty()) {
+            courseId = jdbcTemplate.query(
+                    "SELECT id FROM edu_course WHERE course_code = ? ORDER BY id ASC LIMIT 1",
+                    rs -> rs.next() ? rs.getInt(1) : null,
+                    seed.code
             );
+        }
+        if (courseId == null) {
             courseId = jdbcTemplate.query(
                     "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
                     rs -> rs.next() ? rs.getInt(1) : null,
-                    title
+                    seed.title
+            );
+        }
+
+        int teacherId = getTeacherIdByMobile(seed.teacherMobile, 1);
+        int buyCount = 18 + (sort * 7 % 113);
+        int viewCount = 96 + (sort * 19 % 701);
+        String description = "依据西南大学计算机科学与技术（中外合作办学）2022版培养方案录入。"
+                + "建议第 " + seed.curriculumSemester + " 学期开设，共 " + formatCredit(seed.credit)
+                + " 学分，" + seed.lessonNum + " 学时，考核方式：" + seed.assessmentMethod + "。";
+        if (courseId == null) {
+            jdbcTemplate.update(
+                    "INSERT INTO edu_course(teacher_id, subject_id, course_code, title, price, lesson_num, credit, "
+                            + "course_type, major_name, curriculum_semester, assessment_method, cover, description, "
+                            + "buy_count, view_count, sort, enable, status, remarks) "
+                            + "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)",
+                    teacherId, subjectId, seed.code, seed.title, seed.lessonNum, seed.credit, seed.courseType,
+                    CurriculumCourseCatalog.MAJOR_NAME, seed.curriculumSemester, seed.assessmentMethod, seed.cover,
+                    description, buyCount, viewCount, sort, seed.remarks
+            );
+            courseId = jdbcTemplate.query(
+                    "SELECT id FROM edu_course WHERE title = ? ORDER BY id DESC LIMIT 1",
+                    rs -> rs.next() ? rs.getInt(1) : null,
+                    seed.title
             );
         } else {
             jdbcTemplate.update(
-                    "UPDATE edu_course SET credit = ?, course_type = ?, major_name = '计算机科学与技术', "
-                            + "enable = 1, status = 1 WHERE id = ?",
-                    credit, courseType, courseId
+                    "UPDATE edu_course SET teacher_id = ?, subject_id = ?, course_code = ?, title = ?, lesson_num = ?, "
+                            + "credit = ?, course_type = ?, major_name = ?, curriculum_semester = ?, assessment_method = ?, "
+                            + "cover = ?, description = ?, buy_count = ?, view_count = ?, sort = ?, enable = 1, status = 1, "
+                            + "remarks = ? WHERE id = ?",
+                    teacherId, subjectId, seed.code, seed.title, seed.lessonNum, seed.credit, seed.courseType,
+                    CurriculumCourseCatalog.MAJOR_NAME, seed.curriculumSemester, seed.assessmentMethod, seed.cover,
+                    description, buyCount, viewCount, sort, seed.remarks, courseId
             );
         }
-        if (courseId == null) {
+        return courseId;
+    }
+
+    private void seedCurriculumElectiveSchedule(int courseId, int index) {
+        int dayOfWeek = index % 5 + 1;
+        int sectionStart = index / 5 * 2 + 1;
+        // Keep two controlled overlaps so the advisor demo can visibly prove that
+        // it filters both current-timetable conflicts and conflicts inside a path plan.
+        if (index == 19) {
+            dayOfWeek = 4;
+        } else if (index == 20) {
+            dayOfWeek = 1;
+            sectionStart = 1;
+        }
+        int sectionEnd = sectionStart + 1;
+        String location = "C" + (301 + index % 12);
+        jdbcTemplate.update(
+                "INSERT INTO edu_course_schedule(course_id, day_of_week, section_start, section_end, start_week, end_week, location) "
+                        + "VALUES (?, ?, ?, ?, 1, 16, ?)",
+                courseId, dayOfWeek, sectionStart, sectionEnd, location
+        );
+    }
+
+    private void tuneCurriculumRiskProfiles() {
+        List<Integer> demoMembers = jdbcTemplate.queryForList(
+                "SELECT id FROM uctr_member WHERE mobile BETWEEN '222023321102093' AND '222023321102108' ORDER BY mobile",
+                Integer.class
+        );
+        if (demoMembers.size() < 12) {
             return;
         }
-        jdbcTemplate.update("UPDATE edu_course SET teacher_id = ? WHERE id = ?", assignedTeacherId, courseId);
-        Integer scheduleCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM edu_course_schedule WHERE course_id = ?",
-                Integer.class,
-                courseId
-        );
-        if (scheduleCount != null && scheduleCount == 0) {
-            jdbcTemplate.update(
-                    "INSERT INTO edu_course_schedule(course_id, day_of_week, section_start, section_end, start_week, end_week, location) "
-                            + "VALUES (?, ?, ?, ?, 1, 16, ?)",
-                    courseId, dayOfWeek, sectionStart, sectionEnd, location
-            );
+        List<Integer> publicRequired = courseIdsByType("PUBLIC_REQUIRED");
+        List<Integer> generalElective = courseIdsByType("GENERAL_ELECTIVE");
+        List<Integer> disciplineRequired = courseIdsByType("DISCIPLINE_REQUIRED");
+        List<Integer> majorRequired = courseIdsByType("MAJOR_REQUIRED");
+        List<Integer> majorElective = courseIdsByType("MAJOR_ELECTIVE");
+        List<Integer> practiceRequired = courseIdsByType("PRACTICE_REQUIRED");
+        for (int i = 0; i < demoMembers.size(); i++) {
+            Integer memberId = demoMembers.get(i);
+            jdbcTemplate.update("DELETE FROM edu_grade WHERE member_id = ?", memberId);
+            jdbcTemplate.update("DELETE FROM rel_course_member WHERE member_id = ?", memberId);
+            if (i < 5) {
+                if (i == 1) {
+                    enrollRequiredCourses(memberId, publicRequired, disciplineRequired, majorRequired, practiceRequired, 85);
+                    enrollPendingCourses(memberId, generalElective, 0, generalElective.size());
+                    enrollCoursesUntilCredits(memberId, majorElective, 17, true, 84);
+                } else {
+                    enrollCompleteProfile(memberId, publicRequired, generalElective, disciplineRequired,
+                            majorRequired, majorElective, practiceRequired, 84 + i);
+                }
+            } else if (i < 10) {
+                enrollRequiredCourses(memberId, publicRequired, disciplineRequired, majorRequired, practiceRequired, 76 + i);
+                if (i == 5) {
+                    enrollCourses(memberId, generalElective, 0, generalElective.size(), true, 76 + i);
+                    enrollCoursesUntilCredits(memberId, majorElective, 13.5, true, 72 + i);
+                } else if (i == 6) {
+                    enrollCourses(memberId, generalElective, 0, Math.min(2, generalElective.size()), true, 76 + i);
+                    enrollCoursesUntilCredits(memberId, majorElective, 17, true, 72 + i);
+                } else if (i == 7) {
+                    enrollCourses(memberId, generalElective, 0, generalElective.size(), true, 76 + i);
+                    enrollCoursesUntilCredits(memberId, majorElective, 16.5, true, 72 + i);
+                } else if (i == 8) {
+                    enrollCourses(memberId, generalElective, 0, Math.min(3, generalElective.size()), true, 76 + i);
+                    enrollCoursesUntilCredits(memberId, majorElective, 13.5, true, 72 + i);
+                } else {
+                    enrollCourses(memberId, generalElective, 0, Math.min(3, generalElective.size()), true, 76 + i);
+                    enrollCoursesUntilCredits(memberId, majorElective, 17, true, 72 + i);
+                }
+            } else {
+                if (i == 10) {
+                    enrollCourses(memberId, publicRequired, 0, Math.min(6, publicRequired.size()), true, 68);
+                    enrollCourses(memberId, disciplineRequired, 0, Math.min(2, disciplineRequired.size()), true, 66);
+                } else if (i == 11) {
+                    // Deliberately empty transcript: useful for the maximum-gap dashboard.
+                } else if (i == 12) {
+                    enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, 78);
+                    enrollCourses(memberId, generalElective, 0, generalElective.size(), true, 78);
+                    enrollCourses(memberId, disciplineRequired, 0, Math.max(0, disciplineRequired.size() - 1), true, 76);
+                    enrollCourses(memberId, majorRequired, 0, majorRequired.size(), true, 76);
+                    enrollCourses(memberId, practiceRequired, 0, practiceRequired.size(), true, 80);
+                    enrollCoursesUntilCredits(memberId, majorElective, 17, true, 77);
+                } else if (i == 13) {
+                    enrollCompleteProfile(memberId, publicRequired, generalElective, disciplineRequired,
+                            majorRequired, majorElective, practiceRequired, 77);
+                    enrollCourses(memberId, disciplineRequired, disciplineRequired.size() - 1,
+                            disciplineRequired.size(), false, 55);
+                } else if (i == 14) {
+                    enrollRequiredCourses(memberId, publicRequired, disciplineRequired, majorRequired, practiceRequired, 78);
+                    enrollCoursesUntilCredits(memberId, majorElective, 17, true, 77);
+                } else {
+                    enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, 78);
+                    enrollCourses(memberId, generalElective, 0, generalElective.size(), true, 78);
+                    enrollCourses(memberId, disciplineRequired, 0, disciplineRequired.size(), true, 76);
+                    enrollCourses(memberId, majorRequired, 0, majorRequired.size(), true, 76);
+                    enrollCourses(memberId, practiceRequired, 0, Math.min(7, practiceRequired.size()), true, 80);
+                    enrollCoursesUntilCredits(memberId, majorElective, 17, true, 77);
+                }
+            }
         }
     }
 
-    private int resolveDemoTeacherForCourse(String courseType, String location, int fallbackTeacherId) {
-        if ("A203".equals(location)) {
-            return fallbackTeacherId;
-        }
-        if ("PUBLIC_REQUIRED".equals(courseType) || "GENERAL_ELECTIVE".equals(courseType)) {
-            return getTeacherIdByMobile("13800138004", fallbackTeacherId);
-        }
-        if ("MAJOR_ELECTIVE".equals(courseType) || (location != null && location.startsWith("C"))) {
-            return getTeacherIdByMobile("13800138003", fallbackTeacherId);
-        }
-        return getTeacherIdByMobile("13800138002", fallbackTeacherId);
+    private void enrollCompleteProfile(Integer memberId, List<Integer> publicRequired, List<Integer> generalElective,
+                                       List<Integer> disciplineRequired, List<Integer> majorRequired,
+                                       List<Integer> majorElective, List<Integer> practiceRequired, int baseScore) {
+        enrollRequiredCourses(memberId, publicRequired, disciplineRequired, majorRequired, practiceRequired, baseScore);
+        enrollCourses(memberId, generalElective, 0, generalElective.size(), true, baseScore);
+        enrollCoursesUntilCredits(memberId, majorElective, 17, true, baseScore - 1);
     }
 
-    private void seedProfessionalDemoDataIfNeeded() {
-        normalizeLegacySubjects();
-        ensureSubject("计算机科学与技术", 0, 1);
-        int publicRequiredSubjectId = ensureSubject("公共必修", 0, 10);
-        int foundationSubjectId = ensureSubject("专业基础", 0, 20);
-        int coreSubjectId = ensureSubject("专业核心", 0, 30);
-        int electiveSubjectId = ensureSubject("方向选修", 0, 40);
-        int practiceSubjectId = ensureSubject("实践创新", 0, 50);
-        int generalSubjectId = ensureSubject("通识选修", 0, 60);
+    private void enrollRequiredCourses(Integer memberId, List<Integer> publicRequired, List<Integer> disciplineRequired,
+                                       List<Integer> majorRequired, List<Integer> practiceRequired, int baseScore) {
+        enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, baseScore);
+        enrollCourses(memberId, disciplineRequired, 0, disciplineRequired.size(), true, baseScore - 2);
+        enrollCourses(memberId, majorRequired, 0, majorRequired.size(), true, baseScore - 2);
+        enrollCourses(memberId, practiceRequired, 0, practiceRequired.size(), true, baseScore + 2);
+    }
 
-        ensureProfessionalCourse("高等数学A", "PUBLIC_REQUIRED", 4, "13800138001", publicRequiredSubjectId,
-                1, 3, 4, "A203", 1, 78, 260, "面向计算机专业的数学基础课程，支撑算法分析、建模与后续专业学习。");
-        ensureProfessionalCourse("程序设计基础", "MAJOR_REQUIRED", 4, "13800138002", foundationSubjectId,
-                1, 5, 6, "B101", 2, 92, 430, "以 C/Java 编程训练为主，建立计算思维、代码规范与调试能力。");
-        ensureProfessionalCourse("离散数学", "MAJOR_REQUIRED", 3, "13800138002", foundationSubjectId,
-                2, 1, 2, "B102", 3, 66, 310, "覆盖集合、图论、逻辑与组合数学，是数据结构和算法课程的理论基础。");
-        ensureProfessionalCourse("数据结构", "MAJOR_REQUIRED", 4, "13800138002", coreSubjectId,
-                1, 5, 6, "B203", 4, 118, 620, "系统学习线性表、树、图、查找排序与复杂度分析。");
-        ensureProfessionalCourse("计算机组成原理", "MAJOR_REQUIRED", 3, "13800138002", coreSubjectId,
-                3, 3, 4, "B205", 5, 74, 360, "理解计算机硬件组织、指令系统、存储层次和 CPU 工作机制。");
-        ensureProfessionalCourse("操作系统", "MAJOR_REQUIRED", 3, "13800138002", coreSubjectId,
-                3, 1, 2, "B204", 6, 96, 520, "学习进程、线程、内存、文件系统与并发控制。");
-        ensureProfessionalCourse("计算机网络", "MAJOR_REQUIRED", 3, "13800138003", coreSubjectId,
-                4, 1, 2, "C201", 7, 88, 470, "覆盖 TCP/IP、路由交换、网络应用与基础网络安全。");
-        ensureProfessionalCourse("数据库系统原理", "MAJOR_REQUIRED", 3, "13800138003", coreSubjectId,
-                4, 3, 4, "C202", 8, 102, 540, "学习关系模型、SQL、事务、索引和数据库设计。");
-        ensureProfessionalCourse("人工智能导论", "MAJOR_ELECTIVE", 2, "13800138003", electiveSubjectId,
-                1, 5, 6, "C301", 9, 130, 760, "介绍搜索、机器学习、知识表示与智能系统应用。");
-        ensureProfessionalCourse("软件工程", "MAJOR_REQUIRED", 3, "13800138004", practiceSubjectId,
-                5, 1, 2, "D301", 10, 82, 390, "围绕需求、设计、编码、测试和项目管理组织课程实践。");
-        ensureProfessionalCourse("数据可视化", "MAJOR_ELECTIVE", 2, "13800138003", electiveSubjectId,
-                5, 3, 4, "C302", 11, 76, 420, "训练数据清洗、图表表达、可视分析和交互设计能力。");
-        ensureProfessionalCourse("网络安全基础", "MAJOR_ELECTIVE", 2, "13800138004", electiveSubjectId,
-                5, 5, 6, "D401", 12, 69, 350, "覆盖密码学基础、Web 安全、攻防意识和安全开发规范。");
-        ensureProfessionalCourse("创新创业基础", "GENERAL_ELECTIVE", 2, "13800138004", generalSubjectId,
-                2, 7, 8, "D105", 1, 54, 260, "面向工程项目的创新思维、团队协作与产品意识训练。");
-        ensureProfessionalCourse("大学生心理健康", "GENERAL_ELECTIVE", 2, "13800138004", generalSubjectId,
-                5, 7, 8, "D201", 2, 61, 280, "帮助学生建立健康学习节奏、压力管理与人际沟通能力。");
-        ensureProfessionalCourse("毕业设计智能选题实践", "MAJOR_ELECTIVE", 2, "13800138003", practiceSubjectId,
-                6, 3, 4, "LAB-AI", 12, 43, 260, "围绕真实课题进行选题推荐、过程管理和成果归档演示。");
+    private void enrollPendingCourses(Integer memberId, List<Integer> courseIds, int start, int end) {
+        for (int i = start; i < end && i < courseIds.size(); i++) {
+            jdbcTemplate.update("INSERT IGNORE INTO rel_course_member(course_id, member_id) VALUES (?, ?)",
+                    courseIds.get(i), memberId);
+        }
+    }
 
-        seedComputerScienceStudents();
-        seedComputerScienceSelectionsAndGrades();
-        tuneDemoRiskProfiles();
+    private void enrollCoursesUntilCredits(Integer memberId, List<Integer> courseIds, double targetCredits,
+                                           boolean pass, int baseScore) {
+        double credits = 0;
+        for (int i = 0; i < courseIds.size() && credits < targetCredits; i++) {
+            Integer courseId = courseIds.get(i);
+            enrollCourses(memberId, courseIds, i, i + 1, pass, baseScore);
+            Double credit = jdbcTemplate.queryForObject("SELECT credit FROM edu_course WHERE id = ?", Double.class, courseId);
+            credits += credit == null ? 0 : credit;
+        }
+    }
+
+    private String formatCredit(double value) {
+        return value == Math.floor(value) ? String.valueOf((int) value) : String.valueOf(value);
     }
 
     private void normalizeLegacySubjects() {
@@ -413,45 +523,6 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         return id == null ? 1 : id;
     }
 
-    private void ensureProfessionalCourse(String title, String courseType, double credit, String teacherMobile, int subjectId,
-                                          int dayOfWeek, int sectionStart, int sectionEnd, String location,
-                                          int coverIndex, int buyCount, int viewCount, String description) {
-        int teacherId = getTeacherIdByMobile(teacherMobile, 1);
-        String cover = String.format("/api/pub/image/demo/course-cover-%02d.jpg", coverIndex);
-        Integer courseId = jdbcTemplate.query(
-                "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
-                rs -> rs.next() ? rs.getInt(1) : null,
-                title
-        );
-        if (courseId == null) {
-            jdbcTemplate.update(
-                    "INSERT INTO edu_course(teacher_id, subject_id, title, price, lesson_num, credit, course_type, major_name, "
-                            + "cover, description, buy_count, view_count, sort, enable, status, remarks) "
-                            + "VALUES (?, ?, ?, 0, 48, ?, ?, '计算机科学与技术', ?, ?, ?, ?, ?, 1, 1, '专业演示课程')",
-                    teacherId, subjectId, title, credit, courseType, cover, description, buyCount, viewCount, coverIndex
-            );
-            courseId = jdbcTemplate.query(
-                    "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
-                    rs -> rs.next() ? rs.getInt(1) : null,
-                    title
-            );
-        } else {
-            jdbcTemplate.update(
-                    "UPDATE edu_course SET teacher_id = ?, subject_id = ?, credit = ?, course_type = ?, major_name = '计算机科学与技术', "
-                            + "cover = ?, description = ?, buy_count = ?, view_count = ?, sort = ?, enable = 1, status = 1 WHERE id = ?",
-                    teacherId, subjectId, credit, courseType, cover, description, buyCount, viewCount, coverIndex, courseId
-            );
-        }
-        if (courseId != null) {
-            jdbcTemplate.update("DELETE FROM edu_course_schedule WHERE course_id = ?", courseId);
-            jdbcTemplate.update(
-                    "INSERT INTO edu_course_schedule(course_id, day_of_week, section_start, section_end, start_week, end_week, location) "
-                            + "VALUES (?, ?, ?, ?, 1, 16, ?)",
-                    courseId, dayOfWeek, sectionStart, sectionEnd, location
-            );
-        }
-    }
-
     private void seedComputerScienceStudents() {
         String[] names = {"张明", "李思雨", "王子涵", "赵一鸣", "陈嘉琪", "刘浩然", "周可欣", "黄俊杰",
                 "吴雨桐", "徐子墨", "孙若曦", "胡嘉诚", "林语晨", "郭航", "何清扬", "马欣怡"};
@@ -475,100 +546,12 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
         }
     }
 
-    private void seedComputerScienceSelectionsAndGrades() {
-        String[] courses = {"高等数学A", "程序设计基础", "离散数学", "数据结构", "计算机组成原理", "操作系统",
-                "计算机网络", "数据库系统原理", "人工智能导论", "软件工程", "数据可视化", "网络安全基础",
-                "创新创业基础", "大学生心理健康", "毕业设计智能选题实践"};
-        long base = 222023321102093L;
-        for (int studentIndex = 0; studentIndex < 16; studentIndex++) {
-            Integer memberId = getMemberId(String.valueOf(base + studentIndex));
-            if (memberId == null) {
-                continue;
-            }
-            int selectedCount = 8 + (studentIndex % 6);
-            for (int courseIndex = 0; courseIndex < Math.min(selectedCount, courses.length); courseIndex++) {
-                Integer courseId = getCourseId(courses[courseIndex]);
-                if (courseId == null) {
-                    continue;
-                }
-                jdbcTemplate.update(
-                        "INSERT IGNORE INTO rel_course_member(course_id, member_id) VALUES (?, ?)",
-                        courseId,
-                        memberId
-                );
-                if (courseIndex < 7 + (studentIndex % 4)) {
-                    double score = 58 + ((studentIndex * 7 + courseIndex * 5) % 40);
-                    if (studentIndex == 0) {
-                        score = 78 + (courseIndex % 5) * 3;
-                    }
-                    jdbcTemplate.update(
-                            "INSERT INTO edu_grade(course_id, member_id, score) VALUES (?, ?, ?) "
-                                    + "ON DUPLICATE KEY UPDATE score = VALUES(score)",
-                            courseId,
-                            memberId,
-                            Math.min(score, 98)
-                    );
-                }
-            }
-        }
-    }
-
-    private void tuneDemoRiskProfiles() {
-        java.util.List<Integer> demoMembers = jdbcTemplate.queryForList(
-                "SELECT id FROM uctr_member WHERE mobile BETWEEN '222023321102093' AND '222023321102108' ORDER BY mobile",
-                Integer.class
-        );
-        if (demoMembers.size() < 12) {
-            return;
-        }
-        java.util.List<Integer> publicRequired = courseIdsByTitles("高等数学A");
-        if (publicRequired.isEmpty()) {
-            publicRequired = courseIdsByType("PUBLIC_REQUIRED");
-        }
-        java.util.List<Integer> majorRequiredFull = courseIdsByTitles(
-                "程序设计基础", "离散数学", "数据结构", "计算机组成原理", "操作系统", "计算机网络");
-        java.util.List<Integer> majorRequiredPartial = courseIdsByTitles("程序设计基础", "离散数学");
-        java.util.List<Integer> majorElectiveFull = courseIdsByTitles("人工智能导论", "数据可视化", "网络安全基础");
-        java.util.List<Integer> majorElectivePartial = courseIdsByTitles("人工智能导论");
-        java.util.List<Integer> generalElectiveFull = courseIdsByTitles("创新创业基础", "大学生心理健康");
-        for (int i = 0; i < demoMembers.size(); i++) {
-            Integer memberId = demoMembers.get(i);
-            jdbcTemplate.update("DELETE FROM edu_grade WHERE member_id = ?", memberId);
-            jdbcTemplate.update("DELETE FROM rel_course_member WHERE member_id = ?", memberId);
-            if (i < 5) {
-                enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, 82 + i);
-                enrollCourses(memberId, majorRequiredFull, 0, majorRequiredFull.size(), true, 82 + i);
-                enrollCourses(memberId, majorElectiveFull, 0, majorElectiveFull.size(), true, 82 + i);
-                enrollCourses(memberId, generalElectiveFull, 0, generalElectiveFull.size(), true, 82 + i);
-            } else if (i < 10) {
-                enrollCourses(memberId, publicRequired, 0, publicRequired.size(), true, 76 + i);
-                enrollCourses(memberId, majorRequiredFull, 0, majorRequiredFull.size(), true, 72 + i);
-                enrollCourses(memberId, majorElectivePartial, 0, majorElectivePartial.size(), true, 70 + i);
-                enrollCourses(memberId, generalElectiveFull, 0, generalElectiveFull.size(), true, 70 + i);
-            } else {
-                enrollCourses(memberId, publicRequired, 0, Math.min(1, publicRequired.size()), i % 2 == 0, 55);
-                enrollCourses(memberId, majorRequiredPartial, 0, majorRequiredPartial.size(), i % 3 == 0, 54);
-            }
-        }
-    }
-
     private java.util.List<Integer> courseIdsByType(String courseType) {
         return jdbcTemplate.queryForList(
                 "SELECT id FROM edu_course WHERE enable = 1 AND status = 1 AND course_type = ? ORDER BY sort, id",
                 Integer.class,
                 courseType
         );
-    }
-
-    private java.util.List<Integer> courseIdsByTitles(String... titles) {
-        java.util.List<Integer> ids = new java.util.ArrayList<>();
-        for (String title : titles) {
-            Integer id = getCourseId(title);
-            if (id != null) {
-                ids.add(id);
-            }
-        }
-        return ids;
     }
 
     private void enrollCourses(Integer memberId, java.util.List<Integer> courseIds, int start, int end, boolean pass, int baseScore) {
@@ -584,22 +567,6 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
                     score
             );
         }
-    }
-
-    private Integer getMemberId(String studentNo) {
-        return jdbcTemplate.query(
-                "SELECT id FROM uctr_member WHERE mobile = ? ORDER BY id ASC LIMIT 1",
-                rs -> rs.next() ? rs.getInt(1) : null,
-                studentNo
-        );
-    }
-
-    private Integer getCourseId(String title) {
-        return jdbcTemplate.query(
-                "SELECT id FROM edu_course WHERE title = ? ORDER BY id ASC LIMIT 1",
-                rs -> rs.next() ? rs.getInt(1) : null,
-                title
-        );
     }
 
     private void seedDemoDataIfNeeded() {

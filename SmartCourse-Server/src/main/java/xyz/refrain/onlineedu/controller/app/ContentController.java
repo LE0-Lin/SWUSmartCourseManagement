@@ -104,6 +104,16 @@ public class ContentController {
 		return eduCourseService.listForApp(param);
 	}
 
+	@GetMapping("/get/courses/selectable")
+	@ApiOperation("获取当前学生仍可选择且与课表不冲突的课程")
+	public R getSelectableCourses(HttpServletRequest request) {
+		UctrMemberDetail member = SessionUtils.getMember(request);
+		if (Objects.isNull(member)) {
+			return new R(RS.NOT_LOGIN.status(), "请登录后再操作");
+		}
+		return eduCourseService.listSelectableForApp(member.getId());
+	}
+
 	@GetMapping("/get/courses/{id}")
 	@ApiOperation("获取课程详情")
 	public R getCourseDetail(@PathVariable("id") @Min(1) Integer id) {

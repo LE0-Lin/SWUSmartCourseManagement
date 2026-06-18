@@ -6,7 +6,9 @@ set "SERVER_DIR=%ROOT%SmartCourse-Server"
 set "APP_DIR=%ROOT%SmartCourse-App"
 set "TEACHER_DIR=%ROOT%SmartCourse-Teacher"
 set "ADMIN_DIR=%ROOT%SmartCourse-Admin"
+set "PORTAL_DIR=%ROOT%SmartCourse-Portal"
 set "JAR=%SERVER_DIR%\target\online-edu-0.0.1-SNAPSHOT.jar"
+set "UPLOADS_DIR=%ROOT:\=/%uploads/"
 
 title SmartCourse One Click Startup
 
@@ -15,7 +17,7 @@ echo   SmartCourse One Click Startup
 echo ==================================================
 echo.
 
-echo [1/7] Checking Java...
+echo [1/8] Checking Java...
 where java >nul 2>nul
 if errorlevel 1 (
   echo [ERROR] Java was not found. Please install JDK 8/11 and add java to PATH.
@@ -23,7 +25,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/7] Checking Node.js and npm...
+echo [2/8] Checking Node.js and npm...
 where npm >nul 2>nul
 if errorlevel 1 (
   echo [ERROR] npm was not found. Please install Node.js 14/16 and add npm to PATH.
@@ -31,7 +33,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [3/7] Starting Redis...
+echo [3/8] Starting Redis...
 if exist "%ROOT%Redis\redis-server.exe" (
   start "SmartCourse-Redis" cmd /k "pushd ""%ROOT%Redis"" && redis-server.exe redis.windows.conf"
 ) else (
@@ -49,7 +51,7 @@ if /i "%INIT_DB%"=="Y" (
 )
 
 echo.
-echo [4/7] Checking backend jar...
+echo [4/8] Checking backend jar...
 if not exist "%JAR%" (
   echo [INFO] Backend jar not found. Building with Maven...
   pushd "%SERVER_DIR%"
@@ -62,19 +64,25 @@ if not exist "%JAR%" (
   )
 )
 
-echo [5/7] Starting SpringBoot backend...
-start "SmartCourse-Backend" cmd /k "pushd ""%SERVER_DIR%"" && java -jar ""%JAR%"" --spring.datasource.password=%MYSQL_PWD%"
+echo [5/8] Starting SpringBoot backend...
+start "SmartCourse-Backend" cmd /k "pushd ""%SERVER_DIR%"" && java -jar ""%JAR%"" --storage.local-path=""%UPLOADS_DIR%"""
 timeout /t 5 /nobreak >nul
 
-echo [6/7] Starting Vue frontends...
+echo [6/8] Starting Vue frontends...
 call :start_vue "%APP_DIR%" "SmartCourse-Student"
 call :start_vue "%TEACHER_DIR%" "SmartCourse-Teacher"
 call :start_vue "%ADMIN_DIR%" "SmartCourse-Admin"
 
+echo [7/8] Starting unified portal...
+start "SmartCourse-Portal" cmd /k "pushd ""%PORTAL_DIR%"" && node server.cjs"
+timeout /t 2 /nobreak >nul
+start "" "http://localhost:9527"
+
 echo.
-echo [7/7] Startup commands have been launched.
+echo [8/8] Startup commands have been launched.
 echo Please wait until all frontend windows show "Compiled successfully".
 echo.
+echo Portal : http://localhost:9527
 echo Student: http://localhost:9530
 echo Teacher: http://localhost:9529
 echo Admin  : http://localhost:9528
@@ -114,13 +122,13 @@ if "%MYSQL_CMD%"=="" (
   exit /b 1
 )
 
-"%MYSQL_CMD%" -uroot -p%MYSQL_PWD% -e "DROP DATABASE IF EXISTS online_edu; CREATE DATABASE online_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+"%MYSQL_CMD%" -uroot -e "DROP DATABASE IF EXISTS online_edu; CREATE DATABASE online_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 if errorlevel 1 (
   echo [ERROR] MySQL connection failed. Check root password and MySQL service.
   pause
   exit /b 1
 )
-"%MYSQL_CMD%" -uroot -p%MYSQL_PWD% online_edu < "%SERVER_DIR%\schema.sql"
+"%MYSQL_CMD%" -uroot online_edu < "%SERVER_DIR%\schema.sql"
 if errorlevel 1 (
   echo [ERROR] Database import failed.
   pause

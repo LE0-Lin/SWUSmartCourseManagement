@@ -155,6 +155,27 @@ public class EduCourseService {
 	}
 
 	/**
+	 * List published courses that the current student can still select.
+	 */
+	public R listSelectableForApp(int memberId) {
+		Set<Integer> selectedCourseIds = listSelectedCourseIds(memberId);
+		List<EduCourseEntity> entityList = eduCourseMapper.selectList(
+				Wrappers.lambdaQuery(EduCourseEntity.class)
+						.select(tfi -> !tfi.getColumn().equals(LambdaTypeUtils.getColumnName(EduCourseEntity::getDescription)))
+						.eq(EduCourseEntity::getEnable, true)
+						.eq(EduCourseEntity::getStatus, CourseStatusEnum.PUBLISH)
+						.orderByAsc(EduCourseEntity::getSort)
+		).stream()
+				.filter(course -> !selectedCourseIds.contains(course.getId()))
+				.filter(course -> !StringUtils.hasText(findScheduleConflict(memberId, course.getId())))
+				.collect(Collectors.toList());
+		Page<EduCourseEntity> page = new Page<>(1, Math.max(entityList.size(), 1));
+		page.setRecords(entityList);
+		page.setTotal(entityList.size());
+		return RUtils.success("当前学生可选课程列表", covertToPageResult(page, false).getList());
+	}
+
+	/**
 	 * 创建课程（讲师创建）
 	 */
 	public R create(EduCourseDetailVO vo, MultipartFile file) throws IOException {
@@ -191,6 +212,12 @@ public class EduCourseService {
 		String title = vo.getTitle();
 		Integer subjectId = vo.getSubjectId();
 		Double price = vo.getPrice();
+		String courseCode = vo.getCourseCode();
+		Double credit = vo.getCredit();
+		String courseType = vo.getCourseType();
+		String majorName = vo.getMajorName();
+		String curriculumSemester = vo.getCurriculumSemester();
+		String assessmentMethod = vo.getAssessmentMethod();
 		String description = vo.getDescription();
 		Integer sort = vo.getSort();
 		Integer usualScoreWeight = normalizeWeight(vo.getUsualScoreWeight(), 30);
@@ -207,6 +234,12 @@ public class EduCourseService {
 						.set(StringUtils.hasText(description), EduCourseEntity::getDescription, description)
 						.set(Objects.nonNull(subjectId), EduCourseEntity::getSubjectId, subjectId)
 						.set(Objects.nonNull(price), EduCourseEntity::getPrice, price)
+						.set(Objects.nonNull(courseCode), EduCourseEntity::getCourseCode, courseCode)
+						.set(Objects.nonNull(credit), EduCourseEntity::getCredit, credit)
+						.set(StringUtils.hasText(courseType), EduCourseEntity::getCourseType, courseType)
+						.set(StringUtils.hasText(majorName), EduCourseEntity::getMajorName, majorName)
+						.set(Objects.nonNull(curriculumSemester), EduCourseEntity::getCurriculumSemester, curriculumSemester)
+						.set(Objects.nonNull(assessmentMethod), EduCourseEntity::getAssessmentMethod, assessmentMethod)
 						.set(Objects.nonNull(sort), EduCourseEntity::getSort, sort)
 						.set(EduCourseEntity::getUsualScoreWeight, usualScoreWeight)
 						.set(EduCourseEntity::getExamScoreWeight, examScoreWeight)
@@ -456,6 +489,7 @@ public class EduCourseService {
 						.select(EduCourseEntity::getId, EduCourseEntity::getTitle,
 								EduCourseEntity::getUsualScoreWeight, EduCourseEntity::getExamScoreWeight)
 						.eq(EduCourseEntity::getTeacherId, teacherId)
+						.eq(EduCourseEntity::getEnable, true)
 		);
 		return entityList.stream()
 				.parallel()
@@ -552,6 +586,16 @@ public class EduCourseService {
 				Wrappers.lambdaQuery(EduCourseEntity.class)
 						.in(EduCourseEntity::getId, courseIds)
 		);
+	}
+
+	private Set<Integer> listSelectedCourseIds(int memberId) {
+		return relCourseMemberMapper.selectList(
+				Wrappers.lambdaQuery(RelCourseMemberEntity.class)
+						.select(RelCourseMemberEntity::getCourseId)
+						.eq(RelCourseMemberEntity::getMemberId, memberId)
+		).stream()
+				.map(RelCourseMemberEntity::getCourseId)
+				.collect(Collectors.toSet());
 	}
 
 	/**

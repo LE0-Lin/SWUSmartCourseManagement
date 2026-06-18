@@ -15,6 +15,10 @@
         <el-button slot="append" icon="el-icon-search" style="color: #fff" @click="search" />
       </el-input>
       <div class="nav-right">
+        <a class="portal-entry" href="http://localhost:9527">
+          <i class="el-icon-s-home" />
+          统一门户
+        </a>
         <el-link
           v-if="user===null || Object.keys(user).length===0"
           :underline="false"
@@ -146,6 +150,22 @@ export default {
     right: 0;
     display: flex;
     align-items: center;
+  }
+
+  .portal-entry {
+    margin-right: 22px;
+    color: #606266;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color .25s;
+
+    &:hover {
+      color: #409eff;
+    }
+
+    i {
+      margin-right: 5px;
+    }
   }
 
   .logo {
