@@ -20,7 +20,7 @@ spring:
 
 # storage configuration
 storage:
-  local-path: E:/SmartCourseV3.2/SmartCourse/uploads/
+  local-path: ${SMARTCOURSE_UPLOADS:../uploads/}
   access-path: /api/pub/image/
 
 mybatis-plus:
