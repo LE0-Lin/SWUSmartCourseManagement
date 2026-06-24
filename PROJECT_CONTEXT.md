@@ -373,3 +373,19 @@ and high-risk distribution while exposing distinct advisor scenarios:
 - Main files: `SmartAdvisorService.java`, `service/planning/CoursePathPlanner.java`,
   both new test classes, test logging configuration, `pom.xml`, and
   `src/main/resources/application.yml`.
+
+### Advisor UI And Reproducible Preview
+
+- The student UI displays search scope/cutoffs and incomplete-data status,
+  disables diagnosis for incomplete candidates, and distinguishes an empty
+  plan from a fulfilled curriculum.
+- Added `scripts/build_advisor_preview.cjs` and `scripts/preview_advisor.py`.
+  They compile the actual Vue component and serve four JDBC-test-generated
+  synthetic fixtures locally, without MySQL/Redis/authentication/enrollment.
+- Student `npm ci --ignore-scripts --no-audit --no-fund` and production build
+  passed under Node 24 with `NODE_OPTIONS=--openssl-legacy-provider`.
+- Browser checks passed for exact fit beyond 12 cards, excluded unknown data,
+  missing selected timetable, cutoff warning, and disabled diagnosis action.
+  At 390 px width, document content width was 390 px. Viewport was reset.
+- Read-only fixture preview is running at `http://127.0.0.1:19531/`; it can be
+  stopped with Ctrl+C. Existing application services were not changed.
