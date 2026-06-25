@@ -134,6 +134,16 @@ class SmartAdvisorServiceTest {
         assertEquals("INSUFFICIENT_CREDITS", planning(data).get("status"));
         assertEquals(Boolean.FALSE, planning(data).get("inputComplete"));
         assertTrue(((List<?>) data.get("pathPlan")).isEmpty());
+        assertEquals(37.5, ((Number) ((Map<?, ?>) data.get("summary")).get("projectedRemainingCredits")).doubleValue());
+    }
+
+    @Test
+    void anUnrecognizedTranscriptCategoryIsNotAssignedToMajorElectives() {
+        jdbc.update("UPDATE edu_course SET course_type = 'UNMAPPED' WHERE id = 5");
+        Map<String, Object> data = dashboard();
+        assertEquals("INSUFFICIENT_CREDITS", planning(data).get("status"));
+        assertEquals(17.0, ((Number) ((Map<?, ?>) data.get("summary")).get("projectedRemainingCredits")).doubleValue());
+        assertTrue(((List<?>) data.get("pathPlan")).isEmpty());
     }
 
     @Test
