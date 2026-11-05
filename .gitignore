@@ -31,4 +31,6 @@ Redis/
 *.swo
 
 # Test output
+/build/
+**/__pycache__/
 **/src/test/java/xyz/refrain/onlineedu/Main.java
