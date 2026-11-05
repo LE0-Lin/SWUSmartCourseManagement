@@ -1,6 +1,6 @@
 # SmartCourseV3.2 Project Context
 
-Last updated: 2026-05-31
+Last updated: 2026-11-05
 
 ## Current Runtime
 
@@ -352,3 +352,62 @@ and high-risk distribution while exposing distinct advisor scenarios:
   `cmd` path-substitution smoke test produced `D:/Demo/SmartCourse/uploads/`,
   and `git diff --check` passed. Build output still contains only the existing
   asset-size/Sass deprecation warnings.
+
+## 2026-11-05 Verified Full-Catalog Advisor Planning
+
+- Work uses an isolated checkout at `E:/MyOpen/SmartCourse-improvements`, based
+  on published commit `2fe2140`. Existing uncommitted work in the original
+  local workspace was not imported or changed.
+- Decoupled the complete planning pool from the 12 visible recommendation
+  cards. Timetables are batch-loaded before pure, deterministic path search.
+- Added `CoursePathPlanner`: decimal objective arithmetic, stable tie-breaking,
+  a four-course cap, and a 100,000-state cap with explicit unfinished status.
+- Added dashboard `planning` metadata. Missing/invalid candidate evidence is
+  excluded; missing selected timetable or credit evidence withholds a plan.
+- Removed Maven's unconditional test skip. Added pure search tests, a separate
+  bit-mask oracle over 100 seeded catalogs, and isolated H2/JDBC regressions.
+- Made the default upload path relative, with `SMARTCOURSE_UPLOADS` override.
+- Verification: `mvn -B -ntp verify` passed, 20 tests with no skips/failures;
+  the packaged backend jar was produced. No live MySQL/Redis instance was
+  accessed and no existing backend or database was restarted.
+- Main files: `SmartAdvisorService.java`, `service/planning/CoursePathPlanner.java`,
+  both new test classes, test logging configuration, `pom.xml`, and
+  `src/main/resources/application.yml`.
+
+### Advisor UI And Reproducible Preview
+
+- The student UI displays search scope/cutoffs and incomplete-data status,
+  disables diagnosis for incomplete candidates, and distinguishes an empty
+  plan from a fulfilled curriculum.
+- Added `scripts/build_advisor_preview.cjs` and `scripts/preview_advisor.py`.
+  They compile the actual Vue component and serve four JDBC-test-generated
+  synthetic fixtures locally, without MySQL/Redis/authentication/enrollment.
+- Student `npm ci --ignore-scripts --no-audit --no-fund` and production build
+  passed under Node 24 with `NODE_OPTIONS=--openssl-legacy-provider`.
+- Browser checks passed for exact fit beyond 12 cards, excluded unknown data,
+  missing selected timetable, cutoff warning, and disabled diagnosis action.
+  At 390 px width, document content width was 390 px. Viewport was reset.
+- Read-only fixture preview is running at `http://127.0.0.1:19531/`; it can be
+  stopped with Ctrl+C. Existing application services were not changed.
+
+### Transcript Category Validation
+
+- An unrecognized transcript category is no longer silently assigned to the
+  major-elective bucket. Its credits remain unallocated and planning is
+  withheld with `INSUFFICIENT_CREDITS` until the data is corrected.
+- Added the category regression and strengthened the missing-selected-credit
+  assertion. Current suite: 21 tests, including the 100-catalog oracle check.
+
+### Repository Documentation And CI
+
+- Added root README and MIT notice with inherited attribution preserved,
+  plus upstream, planning, setup, gallery, and real development-timeline docs.
+- Added native SVG overview and browser captures of the fixture-backed Vue
+  component. No real student records are used in the preview or captures.
+- Added CI for Java 8/17 backend verification and Node 22 student production
+  build, with read-only permissions and pinned action commits.
+- Documentation check: six GitHub-rendered Markdown pages, 35 relative links,
+  and SVG/POM XML passed. Local backend verification: 21 tests, no skips or
+  failures. Student production build and focused browser checks passed.
+- Remaining scope: fixed curriculum, no prerequisites/capacity/multi-term
+  planning, legacy dependencies, no full MySQL/auth/enrollment validation.

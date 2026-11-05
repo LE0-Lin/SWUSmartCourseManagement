@@ -66,9 +66,17 @@
         <div class="section-title compact">
           <div>
             <p class="eyebrow">What-if Simulation</p>
-            <h2>一键补齐方案</h2>
+            <h2>候选补选方案</h2>
           </div>
         </div>
+        <el-alert
+          v-if="dashboard.planning"
+          class="planning-report"
+          :type="dashboard.planning.status === 'COMPLETE' ? 'info' : 'warning'"
+          :title="dashboard.planning.message"
+          :closable="false"
+          show-icon
+        />
         <div v-if="pathPlan.length" class="path-list">
           <div v-for="(course, index) in pathPlan" :key="course.courseId" class="path-item">
             <div class="step">{{ index + 1 }}</div>
@@ -80,13 +88,13 @@
             <el-tag size="mini">{{ course.typeLabel }}</el-tag>
           </div>
         </div>
-        <el-empty v-else description="当前暂无需要补齐的课程路径" />
+        <el-empty v-else :description="emptyPlanDescription" />
       </div>
 
       <div class="section-band">
         <div class="section-title compact">
           <div>
-            <p class="eyebrow">Explainable AI</p>
+            <p class="eyebrow">Planning Evidence</p>
             <h2>推理依据</h2>
           </div>
         </div>
@@ -120,7 +128,9 @@
         >
           <div class="recommend-head">
             <el-tag size="mini" effect="dark">{{ course.typeLabel }}</el-tag>
-            <el-tag v-if="course.conflict" size="mini" type="danger" effect="dark">课表冲突</el-tag>
+            <el-tag v-if="course.scheduleKnown === false" size="mini" type="warning">课表待补齐</el-tag>
+            <el-tag v-else-if="course.conflict" size="mini" type="danger" effect="dark">课表冲突</el-tag>
+            <el-tag v-else-if="course.selectable === false" size="mini" type="warning">学分待核对</el-tag>
             <el-tag v-else size="mini" type="success">可选</el-tag>
             <span>{{ formatCredit(course.credit) }} 学分</span>
           </div>
@@ -129,16 +139,16 @@
           <div v-if="course.conflict" class="conflict-text">{{ course.conflictText }}</div>
           <div class="schedule">{{ course.scheduleText }}</div>
           <div class="fit">
-            <span>匹配度</span>
+            <span>启发式匹配</span>
             <el-progress :percentage="Number(course.fitScore || 0)" :stroke-width="8" :color="course.conflict ? '#d9480f' : '#2f9e8f'" />
           </div>
           <el-button
             :type="course.conflict ? 'danger' : 'primary'"
             size="small"
             plain
-            :disabled="course.conflict"
+            :disabled="course.selectable === false"
             @click="diagnose(course.courseId)"
-          >{{ course.conflict ? '存在冲突' : '选课诊断' }}</el-button>
+          >{{ course.conflict ? '存在冲突' : course.selectable === false ? '待完善课程信息' : '选课诊断' }}</el-button>
         </div>
       </div>
       <el-empty v-if="!loading && recommendations.length === 0" description="暂无推荐课程" />
@@ -163,6 +173,13 @@ export default {
     }
   },
   computed: {
+    emptyPlanDescription() {
+      const planning = this.dashboard.planning || {}
+      if (planning.status === 'INSUFFICIENT_CREDITS') return '请先核对已选课程的学分与分类信息'
+      if (planning.status === 'INSUFFICIENT_SCHEDULES') return '请先补齐已选课程的排课信息'
+      if (Number(this.summary.projectedRemainingCredits || 0) <= 0) return '当前预计学分已满足分类要求'
+      return '当前约束与搜索范围内暂无可行补选路径'
+    },
     riskClass() {
       return `risk-${(this.summary.riskLevel || 'MEDIUM').toLowerCase()}`
     },
