@@ -1,6 +1,6 @@
 # SmartCourseV3.2 Project Context
 
-Last updated: 2026-05-31
+Last updated: 2026-11-05
 
 ## Current Runtime
 
@@ -352,3 +352,24 @@ and high-risk distribution while exposing distinct advisor scenarios:
   `cmd` path-substitution smoke test produced `D:/Demo/SmartCourse/uploads/`,
   and `git diff --check` passed. Build output still contains only the existing
   asset-size/Sass deprecation warnings.
+
+## 2026-11-05 Verified Full-Catalog Advisor Planning
+
+- Work uses an isolated checkout at `E:/MyOpen/SmartCourse-improvements`, based
+  on published commit `2fe2140`. Existing uncommitted work in the original
+  local workspace was not imported or changed.
+- Decoupled the complete planning pool from the 12 visible recommendation
+  cards. Timetables are batch-loaded before pure, deterministic path search.
+- Added `CoursePathPlanner`: decimal objective arithmetic, stable tie-breaking,
+  a four-course cap, and a 100,000-state cap with explicit unfinished status.
+- Added dashboard `planning` metadata. Missing/invalid candidate evidence is
+  excluded; missing selected timetable or credit evidence withholds a plan.
+- Removed Maven's unconditional test skip. Added pure search tests, a separate
+  bit-mask oracle over 100 seeded catalogs, and isolated H2/JDBC regressions.
+- Made the default upload path relative, with `SMARTCOURSE_UPLOADS` override.
+- Verification: `mvn -B -ntp verify` passed, 20 tests with no skips/failures;
+  the packaged backend jar was produced. No live MySQL/Redis instance was
+  accessed and no existing backend or database was restarted.
+- Main files: `SmartAdvisorService.java`, `service/planning/CoursePathPlanner.java`,
+  both new test classes, test logging configuration, `pom.xml`, and
+  `src/main/resources/application.yml`.
