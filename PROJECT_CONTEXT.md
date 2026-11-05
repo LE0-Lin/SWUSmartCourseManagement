@@ -397,3 +397,17 @@ and high-risk distribution while exposing distinct advisor scenarios:
   withheld with `INSUFFICIENT_CREDITS` until the data is corrected.
 - Added the category regression and strengthened the missing-selected-credit
   assertion. Current suite: 21 tests, including the 100-catalog oracle check.
+
+### Repository Documentation And CI
+
+- Added root README and MIT notice with inherited attribution preserved,
+  plus upstream, planning, setup, gallery, and real development-timeline docs.
+- Added native SVG overview and browser captures of the fixture-backed Vue
+  component. No real student records are used in the preview or captures.
+- Added CI for Java 8/17 backend verification and Node 22 student production
+  build, with read-only permissions and pinned action commits.
+- Documentation check: six GitHub-rendered Markdown pages, 35 relative links,
+  and SVG/POM XML passed. Local backend verification: 21 tests, no skips or
+  failures. Student production build and focused browser checks passed.
+- Remaining scope: fixed curriculum, no prerequisites/capacity/multi-term
+  planning, legacy dependencies, no full MySQL/auth/enrollment validation.
