@@ -408,10 +408,10 @@ public class SmartAdvisorService {
         Map<String, CreditBucket> buckets = new LinkedHashMap<>();
         requirements.forEach((type, requirement) -> buckets.put(type, new CreditBucket(requirement)));
         for (Map<String, Object> course : selectedCourses) {
-            String type = asString(course.get("courseType"), "MAJOR_ELECTIVE");
+            String type = asString(course.get("courseType"), "");
             CreditBucket bucket = buckets.get(type);
             if (bucket == null) {
-                bucket = buckets.get("MAJOR_ELECTIVE");
+                continue;
             }
             double credit = asDouble(course.get("credit"), 0);
             if (!Double.isFinite(credit) || credit < 0) credit = 0;

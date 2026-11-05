@@ -389,3 +389,11 @@ and high-risk distribution while exposing distinct advisor scenarios:
   At 390 px width, document content width was 390 px. Viewport was reset.
 - Read-only fixture preview is running at `http://127.0.0.1:19531/`; it can be
   stopped with Ctrl+C. Existing application services were not changed.
+
+### Transcript Category Validation
+
+- An unrecognized transcript category is no longer silently assigned to the
+  major-elective bucket. Its credits remain unallocated and planning is
+  withheld with `INSUFFICIENT_CREDITS` until the data is corrected.
+- Added the category regression and strengthened the missing-selected-credit
+  assertion. Current suite: 21 tests, including the 100-catalog oracle check.
